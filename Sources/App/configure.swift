@@ -39,7 +39,7 @@ public func configure(_ app: Application) async throws {
     // MARK: Mailgun
     if let mailgunAPIKey = Environment.get("MAILGUN_API_KEY") {
         app.mailgun.configuration = .init(apiKey: mailgunAPIKey)
-        app.mailgun.defaultDomain = .sandbox
+        app.mailgun.defaultDomain = .worbionDomain
     }
     
     // MARK: App Config

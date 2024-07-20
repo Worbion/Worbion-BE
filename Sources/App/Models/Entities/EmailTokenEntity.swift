@@ -11,8 +11,8 @@ import Fluent
 final class EmailTokenEntity: Model {
     static let schema = "user_email_tokens"
     
-    @ID(key: .id)
-    var id: UUID?
+    @ID(custom: .id, generatedBy: .database)
+    var id: Int64?
     
     @Parent(key: "user_id")
     var user: UserEntity
@@ -26,8 +26,7 @@ final class EmailTokenEntity: Model {
     init() {}
     
     init(
-        id: UUID? = nil,
-        userID: UUID,
+        userID: Int64,
         token: String,
         expiresAt: Date = Date().addingTimeInterval(.accessTokenLifeTime)
     ) {
@@ -37,4 +36,3 @@ final class EmailTokenEntity: Model {
         self.expiresAt = expiresAt
     }
 }
-

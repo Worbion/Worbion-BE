@@ -93,7 +93,6 @@ private extension AuthenticationController {
         try await refreshToken.create(on: request.db)
         
         let loginResponse = LoginResponse(
-            user: UserDTO(from: relatedUser),
             accessToken: try request.jwt.sign(Payload(with: relatedUser)),
             refreshToken: token
         )
@@ -145,16 +144,16 @@ private extension AuthenticationController {
 // MARK: - Get Me
 private extension AuthenticationController {
     @Sendable
-    func getMe(request: Request) async throws -> BaseResponse<UserDTO> {
+    func getMe(request: Request) async throws -> BaseResponse<ClientUserDTOModelS> {
         let payload = try request.auth.require(Payload.self)
         
-        guard 
+        guard
             let relatedUserEntity = try await UserEntity.find(payload.userID, on: request.db)
         else {
             throw AuthenticationError.userNotFound
         }
         
-        let userDTO = UserDTO(from: relatedUserEntity)
+        let userDTO = ClientUserDTOModelS(from: relatedUserEntity)
         
         return .success(data: userDTO)
     }

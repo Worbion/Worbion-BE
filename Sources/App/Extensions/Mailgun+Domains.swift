@@ -2,5 +2,5 @@ import Mailgun
 import Vapor
 
 extension MailgunDomain {
-    static var sandbox: MailgunDomain { .init(Environment.get("MAILGUN_SANDBOX_MAIL") ?? "yourmail@yourdomain.com", .us)}
+    static var worbionDomain: MailgunDomain { .init(Environment.get("MAILGUN_WORBION_DOMAIN") ?? "xxxx@domain.com", .us)}
 }

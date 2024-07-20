@@ -11,8 +11,8 @@ import Fluent
 final class RefreshTokenEntity: Model {
     static let schema = "user_refresh_tokens"
     
-    @ID(key: .id)
-    var id: UUID?
+    @ID(custom: .id, generatedBy: .database)
+    var id: Int64?
     
     @Field(key: "token")
     var token: String
@@ -29,13 +29,11 @@ final class RefreshTokenEntity: Model {
     init() {}
     
     init(
-        id: UUID? = nil,
         token: String,
-        userID: UUID,
+        userID: Int64,
         expiresAt: Date = Date().addingTimeInterval(.refreshTokenLifeTime),
         issuedAt: Date = Date()
     ) {
-        self.id = id
         self.token = token
         self.$user.id = userID
         self.expiresAt = expiresAt

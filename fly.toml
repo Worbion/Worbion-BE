@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for vapor-auth-template1 on 2024-05-29T16:41:00+03:00
+# fly.toml app configuration file generated for worbion-be on 2024-07-18T14:27:06+03:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'vapor-auth-template1'
+app = 'worbion-be'
 primary_region = 'fra'
 
 [build]

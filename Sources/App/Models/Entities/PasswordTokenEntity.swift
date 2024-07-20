@@ -11,8 +11,8 @@ import Fluent
 final class PasswordTokenEntity: Model {
     static let schema: String = "user_password_tokens"
     
-    @ID(key: .id)
-    var id: UUID?
+    @ID(custom: .id, generatedBy: .database)
+    var id: Int64?
     
     @Parent(key: "user_id")
     var user: UserEntity
@@ -26,8 +26,7 @@ final class PasswordTokenEntity: Model {
     init() {}
     
     init(
-        id: UUID? = nil,
-        userID: UUID,
+        userID: Int64,
         token: String,
         expiresAt: Date = Date().addingTimeInterval(.resetPasswordTokenLifeTime)
     ) {

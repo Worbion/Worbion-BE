@@ -27,6 +27,6 @@ extension ResetPasswordEmail: Email {
     }
     
     var subject: String {
-        "Reset your password"
+        "Şifreni Sıfırla"
     }
 }

@@ -16,7 +16,7 @@ struct VerificationEmail {
 // MARK: - VerificationEmail
 extension VerificationEmail: Email {
     var subject: String {
-        "Please verify your email"
+        "Mail Adresi Doğrulama"
     }
     
     var templateData: [String : String] {

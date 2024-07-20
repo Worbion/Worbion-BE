@@ -14,7 +14,7 @@ let package = Package(
         // Fluent
         .package(url: "https://github.com/vapor/fluent.git", from: "4.0.0"),
         // Postgres Driver
-        .package(url: "https://github.com/vapor/fluent-postgres-driver.git", from: "2.0.0"),
+        .package(url: "https://github.com/vapor/fluent-postgres-driver.git", from: "2.9.2"),
         // JWT
         .package(url: "https://github.com/vapor/jwt.git", from: "4.2.2"),
         // Queues
@@ -37,21 +37,14 @@ let package = Package(
                 .product(name: "JWT", package: "jwt"),
                 .product(name: "QueuesRedisDriver", package: "queues-redis-driver"),
                 .product(name: "Mailgun", package: "mailgun")
-            ],
-            swiftSettings: swiftSettings
+            ]
         ),
         .testTarget(
             name: "AppTests",
             dependencies: [
                 .target(name: "App"),
                 .product(name: "XCTVapor", package: "vapor"),
-            ],
-            swiftSettings: swiftSettings
+            ]
         )
     ]
 )
-
-var swiftSettings: [SwiftSetting] { [
-    .enableUpcomingFeature("DisableOutwardActorInference"),
-    .enableExperimentalFeature("StrictConcurrency"),
-] }
