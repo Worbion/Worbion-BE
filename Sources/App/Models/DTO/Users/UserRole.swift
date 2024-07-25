@@ -31,3 +31,9 @@ extension UserRole {
         }
     }
 }
+
+extension UserRole {
+    func doCheckPermission(has role: UserRole) -> Bool {
+        return roleLevel >= role.roleLevel
+    }
+}
