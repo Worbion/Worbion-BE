@@ -26,7 +26,7 @@ public func configure(_ app: Application) async throws {
                 hostname: "localhost",
                 username: "postgres",
                 password: "",
-                database: "auth-template"
+                database: "worbion"
             ),
             as: .psql
         )
