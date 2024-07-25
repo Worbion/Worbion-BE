@@ -41,17 +41,20 @@ final class UserEntity: Model, Authenticatable {
     @OptionalParent(key: "created_by")
     var createdBy: UserEntity?
     
-    @Field(key: "instagram_url")
-    var instagramUrl: String?
+    @Field(key: "instagram_identifier")
+    var instagramIdentifier: String?
     
-    @Field(key: "x_url")
-    var xUrl: String?
+    @Field(key: "x_identifier")
+    var xIdentifier: String?
     
-    @Field(key: "threads_url")
-    var threadsUrl: String?
+    @Field(key: "threads_identifier")
+    var threadsIdentifier: String?
     
-    @Field(key: "tiktok_url")
-    var tiktokUrl: String?
+    @Field(key: "tiktok_identifier")
+    var tiktokIdentifier: String?
+    
+    @Field(key: "website_url")
+    var websiteUrl: String?
     
     @Field(key: "password_hash")
     var passwordHash: String
@@ -81,10 +84,11 @@ final class UserEntity: Model, Authenticatable {
         bio: String? = nil,
         isCorporate: Bool = false,
         createdUserId: Int64? = nil,
-        instagramUrl: String? = nil,
-        xUrl: String? = nil,
-        threadsUrl: String? = nil,
-        tiktokUrl: String? = nil,
+        instagramIdentifier: String? = nil,
+        xIdentifier: String? = nil,
+        threadsIdentifier: String? = nil,
+        tiktokIdentifier: String? = nil,
+        websiteUrl: String? = nil,
         passwordHash: String,
         role: UserRole = .user,
         isEmailVerified: Bool = false
@@ -99,13 +103,21 @@ final class UserEntity: Model, Authenticatable {
         self.bio = bio
         self.isCorporate = isCorporate
         self.$createdBy.id = createdUserId
-        self.instagramUrl = instagramUrl
-        self.xUrl = xUrl
-        self.threadsUrl = threadsUrl
-        self.tiktokUrl = tiktokUrl
+        self.instagramIdentifier = instagramIdentifier
+        self.xIdentifier = xIdentifier
+        self.threadsIdentifier = threadsIdentifier
+        self.tiktokIdentifier = tiktokIdentifier
+        self.websiteUrl = websiteUrl
         self.passwordHash = passwordHash
         self.role = role
         self.isEmailVerified = isEmailVerified
+    }
+}
+
+// MARK: - Computed Properties
+extension UserEntity {
+    var isVerified: Bool {
+        return isCorporate
     }
 }
 
