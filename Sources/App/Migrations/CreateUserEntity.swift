@@ -13,10 +13,6 @@ struct CreateUserEntity: AsyncMigration {
             .field(
                 "created_by", .int64, .references(UserEntity.schema, "id", onDelete: .setNull)
             )
-            .field("instagram_identifier", .string)
-            .field("x_identifier", .string)
-            .field("threads_identifier", .string)
-            .field("tiktok_identifier", .string)
             .field("website_url", .string)
             .field("password_hash", .string, .required)
             .field("user_role", .string, .required)
