@@ -14,9 +14,9 @@ struct UserController: RouteCollection {
         routes.group("user") { user in
             // Get User Credentials
             user.group(UserAuthenticator()) { authenticated in
+                authenticated.get("check-username-available", use: checkUsernameAvailable(request:))
                 authenticated.get(":id", use: fetchUserInfo(request:))
             }
-            
             // Admin Permission Required
             user.group(AdminAuthenticator()) { authenticated in
                 authenticated.post(use: self.createUserFromPanel(request:))
@@ -96,6 +96,27 @@ private extension UserController {
         }
         
         return .success(data: .init(userId: user.id))
+    }
+    
+    @Sendable
+    func checkUsernameAvailable(request: Request) async throws -> BaseResponse<Bool> {
+        guard
+            let username = request.parameters.get("username"),
+            !username.isEmpty
+        else {
+            let error = GeneralError.generic(
+                userMessage: nil,
+                systemMessage: "Username required",
+                status: .badRequest
+            )
+            throw error
+        }
+        
+        let relatedUser = try await UserEntity.query(on: request.db)
+            .filter(\.$username == username)
+            .first()
+        
+        return .success(data: relatedUser == nil)
     }
 }
 
