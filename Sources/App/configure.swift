@@ -2,6 +2,7 @@ import Vapor
 import JWT
 import Fluent
 import FluentPostgresDriver
+import GoogleCloud
 
 // configures your application
 public func configure(_ app: Application) async throws {
@@ -32,6 +33,8 @@ public func configure(_ app: Application) async throws {
         )
     }
     
+    app.routes.defaultMaxBodySize = "10mb"
+    
     // MARK: Middleware
     app.middleware = .init()
     app.middleware.use(ErrorMiddleware.default(environment: app.environment))
@@ -49,7 +52,8 @@ public func configure(_ app: Application) async throws {
     try migrations(app)
     try queues(app)
     try services(app)
-    
+    try setupStorage(app: app)
+
     try await app.autoMigrate()
     try app.queues.startInProcessJobs()
     

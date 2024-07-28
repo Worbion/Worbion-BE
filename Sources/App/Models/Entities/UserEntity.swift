@@ -41,6 +41,15 @@ final class UserEntity: Model, Authenticatable {
     @OptionalParent(key: "created_by")
     var createdBy: UserEntity?
     
+    @Field(key: "instagram_identifier")
+    var instagramId: String?
+    
+    @Field(key: "tiktok_identifier")
+    var tiktokId: String?
+    
+    @Field(key: "x_identifier")
+    var xId: String?
+    
     @Field(key: "website_url")
     var websiteUrl: String?
     
@@ -58,9 +67,6 @@ final class UserEntity: Model, Authenticatable {
     
     @Timestamp(key: "updated_at", on: .update)
     var updatedAt: Date?
-    
-    @Children(for: \.$user)
-    var socials: [UserSocialEntity]
     
     init() {}
     
