@@ -94,7 +94,6 @@ private extension UserController {
             
             try await request.queue.dispatch(EmailJob.self, .init(membershipCredentialsInfoMail, to: registerRequest.email))
         }
-        
         return .success(data: .init(userId: user.id))
     }
     
