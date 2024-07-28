@@ -14,7 +14,13 @@ struct Payload: JWTPayload, Authenticatable {
     var exp: ExpirationClaim
     
     func verify(using signer: JWTSigner) throws {
-        try self.exp.verifyNotExpired()
+        do {
+            try self.exp.verifyNotExpired()
+        } catch {
+            let error = AuthenticationError.authTokenExpired
+            throw error
+        }
+        
     }
     
     init(with user: UserEntity) throws {
