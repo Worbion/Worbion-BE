@@ -13,5 +13,6 @@ func migrations(_ app: Application) throws {
     app.migrations.add(CreateRefreshTokenEntity())
     app.migrations.add(CreateEmailTokenEntity())
     app.migrations.add(CreatePasswordTokenEntity())
+    app.migrations.add(CreateConsentEntity())
 }
 
