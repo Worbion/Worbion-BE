@@ -26,11 +26,6 @@ struct AuthenticationController: RouteCollection {
             auth.post("recover", use: recoverAccount)
             
             auth.post("accessToken", use: refreshAccessToken)
-            
-            // Authentication required
-            auth.group(UserAuthenticator()) { authenticated in
-                authenticated.get("me", use: getMe)
-            }
         }
     }
 }
@@ -88,7 +83,8 @@ private extension AuthenticationController {
             .delete()
         
         let token = request.random.generate(bits: 256)
-        let refreshToken = try RefreshTokenEntity(token: token, userID: relatedUser.requireID())
+        let hashedToken = SHA256.hash(token)
+        let refreshToken = try RefreshTokenEntity(token: hashedToken, userID: relatedUser.requireID())
         
         try await refreshToken.create(on: request.db)
         
@@ -138,24 +134,6 @@ private extension AuthenticationController {
         let response = AccessTokenResponse(refreshToken: token, accessToken: accessToken)
         
         return .success(data: response)
-    }
-}
-
-// MARK: - Get Me
-private extension AuthenticationController {
-    @Sendable
-    func getMe(request: Request) async throws -> BaseResponse<ClientUserDTOModelS> {
-        let payload = try request.auth.require(Payload.self)
-        
-        guard
-            let relatedUserEntity = try await UserEntity.find(payload.userID, on: request.db)
-        else {
-            throw AuthenticationError.userNotFound
-        }
-        
-        let userDTO = ClientUserDTOModelS(from: relatedUserEntity)
-        
-        return .success(data: userDTO)
     }
 }
 
