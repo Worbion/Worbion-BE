@@ -21,6 +21,7 @@ enum AuthenticationError: BaseError {
     case invalidPasswordToken
     case passwordTokenHasExpired
     case emailAlreadyVerified
+    case authTokenExpired
 }
 
 // MARK: - Error HTTP Status
@@ -53,6 +54,8 @@ extension AuthenticationError {
             return .unauthorized
         case .emailAlreadyVerified:
             return .badRequest
+        case .authTokenExpired:
+            return .unauthorized
         }
     }
 }
@@ -87,6 +90,8 @@ extension AuthenticationError {
             return "auth.password_token_has_expired"
         case .emailAlreadyVerified:
             return "auth.email_already_verified"
+        case .authTokenExpired:
+            return "auth.authentication_token_has_expired"
         }
     }
 }
@@ -121,6 +126,8 @@ extension AuthenticationError {
             return "Reset password token has expired"
         case .emailAlreadyVerified:
             return "Email already verified."
+        case .authTokenExpired:
+            return "Authentication token has expired"
         }
     }
 }
