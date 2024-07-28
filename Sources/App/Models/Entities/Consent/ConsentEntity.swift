@@ -1,0 +1,57 @@
+//
+//  CreateConsentEntity.swift
+//
+//
+//  Created by Cemal on 28.07.2024.
+//
+
+import Vapor
+import Fluent
+
+// MARK: - ConsentEntity
+final class ConsentEntity: Model {
+    static let schema = "consents"
+    
+    @ID(custom: .id, generatedBy: .database)
+    var id: Int64?
+    
+    @Field(key: "consent_name")
+    var consentName: String
+    
+    @Field(key: "consent_caption")
+    var consentCaption: String
+    
+    @Field(key: "consent_version")
+    var consentVersion: Double
+    
+    @Field(key: "consent_url")
+    var consentUrl: String
+    
+    @Field(key: "consent_type")
+    var consentType: ConsentType
+    
+    @Timestamp(key: "created_at", on: .create)
+    var createdAt: Date?
+    
+    @Timestamp(key: "updated_at", on: .update)
+    var updatedAt: Date?
+    
+    init() {}
+    
+    init(
+        consentName: String, 
+        consentCaption: String,
+        consentVersion: Double,
+        consentUrl: String,
+        consentType: ConsentType
+    ) {
+        self.consentName = consentName
+        self.consentCaption = consentCaption
+        self.consentVersion = consentVersion
+        self.consentUrl = consentUrl
+        self.consentType = consentType
+    }
+}
+
+
+
