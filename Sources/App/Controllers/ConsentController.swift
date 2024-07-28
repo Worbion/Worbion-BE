@@ -13,15 +13,13 @@ struct ConsentController: RouteCollection {
         routes.group("consent") { user in
             user.group(AdminAuthenticator()) { authenticated in
                 authenticated.post(use: createConsent(request:))
+                authenticated.put(":id", use: updateConsent(request:))
             }
         }
     }
 }
 
 private extension ConsentController {
-    /// Fetch info of user
-    /// - Parameter request: Request
-    /// - Returns: UserProfileResponse **User information visible to anyone registered**
     @Sendable
     func createConsent(request: Request) async throws -> BaseResponse<ConsentCreateResponse> {
         
@@ -74,5 +72,52 @@ private extension ConsentController {
         
         try await newConsent.save(on: request.db)
         return .success(data: .init(consentId: newConsent.id))
+    }
+    
+    @Sendable
+    func updateConsent(request: Request) async throws -> BaseResponse<Bool> {
+        guard
+            let consentIdParameter = request.parameters.get("id"),
+            let consentId = Int64(consentIdParameter)
+        else {
+            let error = GeneralError.generic(
+                userMessage: nil,
+                systemMessage: "UserId is missing or incorrect parameter.",
+                status: .badRequest
+            )
+            throw error
+        }
+        
+        try ConsentUpdateRequest.validate(query: request)
+        
+        let consentUpdateRequest = try request.content.decodeRequestContent(content: ConsentUpdateRequest.self)
+        
+        guard
+            let consentEntity = try await ConsentEntity.find(consentId, on: request.db)
+        else {
+            let message = "Consent not found"
+            let error = GeneralError.generic(
+                userMessage: message,
+                systemMessage: message,
+                status: .notFound
+            )
+            throw error
+        }
+        
+        guard
+            consentEntity.compareAndUpdateFieldsIfCanDo(with: consentUpdateRequest)
+        else {
+            let message = "Update failed. Fields are same."
+            let error = GeneralError.generic(
+                userMessage: message,
+                systemMessage: message,
+                status: .badRequest
+            )
+            throw error
+        }
+        
+        try await consentEntity.update(on: request.db)
+        
+        return .success(data: true)
     }
 }
