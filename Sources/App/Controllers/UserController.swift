@@ -100,17 +100,12 @@ private extension UserController {
     
     @Sendable
     func checkUsernameAvailable(request: Request) async throws -> BaseResponse<Bool> {
-        guard
-            let username = request.parameters.get("username"),
-            !username.isEmpty
-        else {
-            let error = GeneralError.generic(
-                userMessage: nil,
-                systemMessage: "Username required",
-                status: .badRequest
-            )
-            throw error
-        }
+        
+        let username = try request.query.get(
+            decodableType: String.self,
+            at: "username",
+            specMessage: "Username required"
+        )
         
         let relatedUser = try await UserEntity.query(on: request.db)
             .filter(\.$username == username)
