@@ -23,6 +23,8 @@ let package = Package(
         .package(url: "https://github.com/vapor/queues-redis-driver.git", from: "1.1.1"),
         // Mailgun
         .package(url: "https://github.com/vapor-community/mailgun.git", from: "5.0.0"),
+        // Google Cloud Kit
+        .package(url: "https://github.com/vapor-community/google-cloud.git", from: "1.4.1")
     ],
     targets: [
         .executableTarget(
@@ -36,7 +38,8 @@ let package = Package(
                 .product(name: "Vapor", package: "vapor"),
                 .product(name: "JWT", package: "jwt"),
                 .product(name: "QueuesRedisDriver", package: "queues-redis-driver"),
-                .product(name: "Mailgun", package: "mailgun")
+                .product(name: "Mailgun", package: "mailgun"),
+                .product(name: "CloudStorage", package: "google-cloud"),
             ]
         ),
         .testTarget(

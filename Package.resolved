@@ -1,5 +1,5 @@
 {
-  "originHash" : "c8784652bef58ddeb299ba5c537cc3e7394703fd19a4aa729d75670818856c03",
+  "originHash" : "0eae868bf28c2dd07cee8284fd457d7ff9b40fee94440c98d604d1efaee5341c",
   "pins" : [
     {
       "identity" : "async-http-client",
@@ -53,6 +53,24 @@
       "state" : {
         "revision" : "e2988a8c960196eca2891f3a0bb1caad9044e7ea",
         "version" : "2.9.2"
+      }
+    },
+    {
+      "identity" : "google-cloud",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/vapor-community/google-cloud.git",
+      "state" : {
+        "revision" : "b14c229f87664c3d4e30e4a07dd6eff25c3df1ff",
+        "version" : "1.4.1"
+      }
+    },
+    {
+      "identity" : "google-cloud-kit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/vapor-community/google-cloud-kit.git",
+      "state" : {
+        "revision" : "17b2eec3df26c6535a90b5650dee53670494f4d9",
+        "version" : "1.0.0-rc.9"
       }
     },
     {
