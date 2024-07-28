@@ -54,12 +54,14 @@ enum GCSBucket: String {
 // MARK: - FileContentType
 enum FileContentType {
     case image(format: ImageFormatType)
-    
+    case pdf
     
     var contentType: String {
         switch self {
         case .image(let format):
             return "image/\(format.rawValue)"
+        case .pdf:
+            return "application/pdf"
         }
     }
 }
