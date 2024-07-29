@@ -48,7 +48,7 @@ struct StorageUploadResult {
 
 // MARK: - Buckets
 enum GCSBucket: String {
-    case worbion = "worbion"
+    case worbion = "worbiontestbucket"
 }
 
 // MARK: - FileContentType
