@@ -9,7 +9,7 @@ import Vapor
 import Fluent
 
 // MARK: - ConsentEntity
-final class ConsentEntity: Model {
+final class ConsentEntity: Model, Content {
     static let schema = "consents"
     
     @ID(custom: .id, generatedBy: .database)
@@ -21,12 +21,6 @@ final class ConsentEntity: Model {
     @Field(key: "consent_caption")
     var consentCaption: String
     
-    @Field(key: "consent_version")
-    var consentVersion: Double
-    
-    @Field(key: "consent_url")
-    var consentUrl: String
-    
     @Field(key: "consent_type")
     var consentType: ConsentType
     
@@ -36,22 +30,18 @@ final class ConsentEntity: Model {
     @Timestamp(key: "updated_at", on: .update)
     var updatedAt: Date?
     
+    @Children(for: \.$consent)
+    var versions: [ConsentVersionEntity]
+    
     init() {}
     
     init(
         consentName: String, 
         consentCaption: String,
-        consentVersion: Double,
-        consentUrl: String,
         consentType: ConsentType
     ) {
         self.consentName = consentName
         self.consentCaption = consentCaption
-        self.consentVersion = consentVersion
-        self.consentUrl = consentUrl
         self.consentType = consentType
     }
 }
-
-
-

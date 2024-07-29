@@ -17,9 +17,7 @@ struct ConsentUpdateRequest: Content {
 extension ConsentUpdateRequest: Validatable {
     static func validations(_ validations: inout Validations) {
         validations.add("consentName", as: String.self, is: !.empty)
-        validations.add("consentName", as: String.self, is: .characterSet(.letters))
         validations.add("consentCaption", as: String.self, is: !.empty)
-        validations.add("consentCaption", as: String.self, is: .characterSet(.letters))
     }
 }
 

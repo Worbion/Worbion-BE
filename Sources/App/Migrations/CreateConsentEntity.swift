@@ -12,12 +12,12 @@ struct CreateConsentEntity: AsyncMigration {
         try await database.schema(ConsentEntity.schema)
             .field("id", .int64, .identifier(auto: true))
             .field("consent_name", .string, .required)
+            .unique(on: "consent_name")
             .field("consent_caption", .string, .required)
-            .field("consent_version", .double, .required)
-            .field("consent_url", .string, .required)
             .field("consent_type", .string, .required)
-            .field("created_at", .date, .required)
-            .field("updated_at", .date, .required)
+            .unique(on: "consent_type")
+            .field("created_at", .datetime, .required)
+            .field("updated_at", .datetime, .required)
             .create()
     }
     
