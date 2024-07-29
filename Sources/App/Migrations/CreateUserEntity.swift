@@ -26,8 +26,8 @@ struct CreateUserEntity: AsyncMigration {
             .unique(on: "email")
             .field("username", .string, .required)
             .unique(on: "username")
-            .field("created_at", .date, .required)
-            .field("updated_at", .date, .required)
+            .field("created_at", .datetime, .required)
+            .field("updated_at", .datetime, .required)
             .create()
     }
     
