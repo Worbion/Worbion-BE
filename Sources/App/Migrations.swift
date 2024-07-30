@@ -15,5 +15,6 @@ func migrations(_ app: Application) throws {
     app.migrations.add(CreatePasswordTokenEntity())
     app.migrations.add(CreateConsentEntity())
     app.migrations.add(CreateConsentVersionEntity())
+    app.migrations.add(CreateDeviceEntity())
 }
 
