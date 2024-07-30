@@ -16,5 +16,7 @@ enum ClientChannelType: Int {
 
 // MARK: - ClientChannelType
 extension ClientChannelType: CustomHeaderKeyable {
-    static var customHeaderKey: String = "x-client-channel-type"
+    static var customHeaderKey: CustomHeaderKeyType {
+        return .channelType
+    }
 }

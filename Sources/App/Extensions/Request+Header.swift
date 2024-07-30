@@ -9,8 +9,8 @@ import Vapor
 
 // Get header field by name
 extension Request {
-    func getHeaderField(by name: String) -> String? {
-        return headers.first(name: name)
+    func getCustomHeaderField(by name: CustomHeaderKeyType) -> String? {
+        return headers.first(name: name.rawValue)
     }
 }
 
@@ -18,7 +18,7 @@ extension Request {
 extension Request {
     var clientChannelType: ClientChannelType? {
         guard
-            let clientChannelTypeStr = getHeaderField(by: ClientChannelType.customHeaderKey),
+            let clientChannelTypeStr = getCustomHeaderField(by: .channelType),
             let clientChannelType = Int(clientChannelTypeStr)
         else {
             return nil

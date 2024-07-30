@@ -8,5 +8,5 @@
 import Foundation
 
 protocol CustomHeaderKeyable {
-    static var customHeaderKey: String { get }
+    static var customHeaderKey: CustomHeaderKeyType { get }
 }
