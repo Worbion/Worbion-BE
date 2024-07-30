@@ -54,7 +54,6 @@ private extension ConsentController {
         do {
             try await newConsent.save(on: request.db)
         }catch {
-            print(error)
             if let dbError = error as? DatabaseError, dbError.isConstraintFailure {
                 let message = "This consent type has already a consent. You cant create again. Please create a new version for this consent."
                 let error = GeneralError.generic(userMessage: message, systemMessage: message, status: .conflict)
@@ -147,9 +146,9 @@ private extension ConsentController {
         
         // Fetch consent
         guard 
-            let _ = try await ConsentEntity.find(consentId, on: request.db)
+            let consent = try await ConsentEntity.find(consentId, on: request.db)
         else {
-            let message = "Consent not found"
+            let message = "The Consent you want to create new version not found."
             let error = GeneralError.generic(
                 userMessage: message,
                 systemMessage: message,
@@ -157,39 +156,14 @@ private extension ConsentController {
             )
             throw error
         }
-        
-        // upload new consent into the storage
-        let uuid = UUID().uuidString
-        let fileName = "consents/\(consentId)/\(uuid)-\(createConsentVersionRequest.version).pdf"
-        
-        let fileUploadRequest = try await request.storageHelper.uploadFile(
-            fileData: createConsentVersionRequest.consentFile,
-            contentType: .pdf,
-            fileName: fileName
-        )
-        
-        guard
-            let pdfLink = fileUploadRequest.mediaLink
-        else {
-            let userMessage = "An error occured while uploading consent file"
-            let systemMessage = "media link is nil"
-            
-            let error = GeneralError.generic(
-                userMessage: userMessage,
-                systemMessage: systemMessage,
-                status: .internalServerError
-            )
-            throw error
-        }
-        
+                
         let versionEntity = ConsentVersionEntity(
             create: createConsentVersionRequest,
-            consentId: consentId,
-            url: pdfLink
+            consentId: consentId
         )
         
         do {
-            try await versionEntity?.save(on: request.db)
+            try await consent.$versions.create(versionEntity, on: request.db)
         }catch {
             if let dbError = error as? DatabaseError, dbError.isConstraintFailure {
                 let message = "This consent version is already exist. Please change the version."
@@ -198,7 +172,8 @@ private extension ConsentController {
             }
             throw error
         }
-        let newVersionId = try versionEntity?.requireID()
+        
+        let newVersionId = try versionEntity.requireID()
         
         return .success(data: newVersionId)
     }
@@ -229,7 +204,7 @@ private extension ConsentController {
         }
         
         let response = ConsentVersionResponse(
-            consentUrl: latestVersionOfConsent.url,
+            consentHtml: latestVersionOfConsent.htmlString,
             version: latestVersionOfConsent.version
         )
         

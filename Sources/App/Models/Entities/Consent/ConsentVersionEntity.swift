@@ -21,8 +21,8 @@ final class ConsentVersionEntity: Model, Content {
     @Field(key: "consent_version")
     var version: Double
     
-    @Field(key: "consent_url")
-    var url: String
+    @Field(key: "consent_html")
+    var htmlString: String
     
     @Timestamp(key: "created_at", on: .create)
     var createdAt: Date?
@@ -32,11 +32,11 @@ final class ConsentVersionEntity: Model, Content {
     init(
         consentId: ConsentEntity.IDValue,
         version: Double,
-        url: String
+        htmlString: String
     ) {
         self.$consent.id = consentId
         self.version = version
-        self.url = url
+        self.htmlString = htmlString
     }
 }
 

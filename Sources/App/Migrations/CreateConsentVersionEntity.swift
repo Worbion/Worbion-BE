@@ -15,7 +15,7 @@ struct CreateConsentVersionEntity: AsyncMigration {
             .field("consent_id", .int64, .required, .references("consents", "id", onDelete: .cascade))
             .field("consent_version", .double, .required)
             .unique(on: "consent_id", "consent_version") // This fields combination should be unique
-            .field("consent_url", .string, .required)
+            .field("consent_html", .string, .required)
             .field("created_at", .datetime)
             .create()
     }

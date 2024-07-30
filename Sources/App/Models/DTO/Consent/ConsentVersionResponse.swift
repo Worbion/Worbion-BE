@@ -9,24 +9,28 @@ import Vapor
 
 // MARK: - ConsentVersionResponse
 struct ConsentVersionResponse: Content {
-    let consentUrl: String
+    let consentHtml: String
     let version: Double
 }
 
 // MARK: - ConsentVersionXLResponse
 struct ConsentVersionXLResponse: Content {
     let id: Int64?
-    let consentUrl: String
+    let consentHtml: String
     let version: Double
     let createdAt: Date?
 }
 
+// MARK: - ConsentVersionEntity + ConsentVersionResponse
 extension ConsentVersionEntity {
     var mapConsentVersionResponse: ConsentVersionResponse {
-        return .init(consentUrl: url, version: version)
+        return ConsentVersionResponse(consentHtml: htmlString, version: version)
     }
-    
+}
+
+// MARK: - ConsentVersionEntity + ConsentVersionXLResponse
+extension ConsentVersionEntity {
     var mapConsentVersionXLResponse: ConsentVersionXLResponse {
-        return .init(id: id, consentUrl: url, version: version, createdAt: createdAt)
+        return ConsentVersionXLResponse(id: id, consentHtml: htmlString, version: version, createdAt: createdAt)
     }
 }

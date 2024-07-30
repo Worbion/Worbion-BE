@@ -10,7 +10,7 @@ import Vapor
 // MARK: - CreateConsentVersionRequest
 struct CreateConsentVersionRequest: Content {
     let version: String
-    let consentFile: Data
+    let consentHTML: String
 }
 
 // MARK: - Validatable
@@ -21,17 +21,17 @@ extension CreateConsentVersionRequest: Validatable {
             let validator = StringDoubleValidator(valueStr: versionStr)
             return validator
         }))
-        validations.add("consentFile", as: Data.self, is: !.empty)
+        validations.add("consentHTML", as: String.self, is: !.empty)
     }
 }
 
+// MARK: - ConsentVersionEntity + CreateConsentVersionRequest
 extension ConsentVersionEntity {
-    convenience init?(
+    convenience init(
         create request: CreateConsentVersionRequest,
-        consentId: ConsentEntity.IDValue,
-        url: String
+        consentId: ConsentEntity.IDValue
     ) {
-        guard let doubleVersion = Double(request.version) else { return nil }
-        self.init(consentId: consentId, version: doubleVersion, url: url)
+        let doubleVersion = Double(request.version) ?? 1.0
+        self.init(consentId: consentId, version: doubleVersion, htmlString: request.consentHTML)
     }
 }
