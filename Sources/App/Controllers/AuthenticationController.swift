@@ -13,6 +13,7 @@ struct AuthenticationController: RouteCollection {
         routes.group("auth") { auth in
             auth.post("register", use: register)
             auth.post("login", use: login)
+            auth.delete("logout", use: logout)
             
             auth.group("email-verification") { emailVerificationRoutes in
                 emailVerificationRoutes.post("", use: sendEmailVerification)
@@ -88,12 +89,36 @@ private extension AuthenticationController {
         
         try await refreshToken.create(on: request.db)
         
+        // Create relation between device and user
+        if let deviceId = request.getCustomHeaderField(by: .deviceId) {
+            do {
+                try await DeviceEntity.query(on: request.db)
+                    .filter(\.$deviceId == deviceId)
+                    .set(\.$user.$id, to: try relatedUser.requireID())
+                    .update()
+            }catch {
+                request.logger.info(.init(stringLiteral: error.localizedDescription))
+            }
+        }
+        
         let loginResponse = LoginResponse(
             accessToken: try request.jwt.sign(Payload(with: relatedUser)),
             refreshToken: token
         )
         
         return .success(data: loginResponse)
+    }
+    
+    @Sendable
+    func logout(request: Request) async throws -> BaseResponse<Bool> {
+        // Remove the relation between user and device
+        if let deviceId = request.getCustomHeaderField(by: .deviceId) {
+            try await DeviceEntity.query(on: request.db)
+                .filter(\.$deviceId == deviceId)
+                .set(\.$user.$id, to: nil)
+                .update()
+        }
+        return .success(data: true)
     }
 }
 
