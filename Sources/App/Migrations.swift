@@ -17,5 +17,6 @@ func migrations(_ app: Application) throws {
     app.migrations.add(CreateConsentVersionEntity())
     app.migrations.add(CreateDeviceEntity())
     app.migrations.add(CreateBankEntity())
+    app.migrations.add(CreateUserBankAccountEntity())
 }
 

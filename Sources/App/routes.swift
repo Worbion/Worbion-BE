@@ -6,4 +6,5 @@ func routes(_ app: Application) throws {
     try! app.register(collection: ConsentController())
     try! app.register(collection: DeviceController())
     try! app.register(collection: BankController())
+    try! app.register(collection: UserBankAccountController())
 }
