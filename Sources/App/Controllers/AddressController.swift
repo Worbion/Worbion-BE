@@ -17,12 +17,11 @@ struct AddressController: RouteCollection {
             address.group(UserAuthenticator()) { userAuth in
                 userAuth.get("proviences", use: getProviences)
                 userAuth.get("districts", use: getDistricts)
-                userAuth.get("neighborhoods", use: getNeighborhoods)
+                userAuth.get("neighbourhoods", use: getNeighborhoods)
             }
         }
     }
 }
-
 
 // MARK: - Address Methods
 extension AddressController {
