@@ -8,4 +8,5 @@ func routes(_ app: Application) throws {
     try! app.register(collection: BankController())
     try! app.register(collection: UserBankAccountController())
     try! app.register(collection: AddressController())
+    try! app.register(collection: UserAddressController())
 }
