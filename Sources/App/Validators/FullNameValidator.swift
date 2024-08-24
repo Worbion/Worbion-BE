@@ -8,43 +8,45 @@
 import Vapor
 
 // MARK: - FullNameValidator
-struct FullNameValidator: ValidatorResult {
+struct FullNameValidator {
     private var fullNameStr: String
-        
-    var isFailure: Bool {
-        return !doValidateFullName()
-    }
     
-    var successDescription: String? {
-        return nil
+    init(
+        fullNameStr: String
+    ) {
+        self.fullNameStr = fullNameStr
     }
+}
+
+// MARK: - BaseValidatorResult
+extension FullNameValidator: BaseValidatorResult {
     
     var failureDescription: String? {
         return "\(fullNameStr) is not valid FullName."
     }
     
-    init(fullNameStr: String) {
-        self.fullNameStr = fullNameStr
-    }
-}
-
-extension FullNameValidator {
-    func doValidateFullName() -> Bool {
+    func doValidate() -> Bool {
+        guard StringOutWhiteSpaceAndNewLineValidator(string: fullNameStr).isFailure else { return false }
+        // Trim whitespace from the start and end
         let trimmedName = fullNameStr.trimmingCharacters(in: .whitespacesAndNewlines)
         
-        let words = trimmedName.split(separator: " ")
+        // Split the name by spaces
+        let nameComponents = trimmedName.split(separator: " ")
         
-        guard words.count >= 2 else { return false }
+        // Check if there are at least two components (first and last name)
+        guard nameComponents.count >= 2 else {
+            return false
+        }
         
-        // insert turkish chars
-        var letterCharacterSet = CharacterSet.letters
-        letterCharacterSet.insert(charactersIn: "çğıöşüÇĞİÖŞÜ")
+        // Check each component for valid characters (letters, hyphens, apostrophes)
+        let validCharacterSet = CharacterSet.letters.union(CharacterSet(charactersIn: "-'"))
         
-        for word in words {
-            if word.rangeOfCharacter(from: letterCharacterSet.inverted) != nil {
+        for component in nameComponents {
+            if component.rangeOfCharacter(from: validCharacterSet.inverted) != nil {
                 return false
             }
         }
+        
         return true
     }
 }
