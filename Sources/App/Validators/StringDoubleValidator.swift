@@ -9,24 +9,21 @@ import Vapor
 
 // MARK: - StringDoubleValidator
 struct StringDoubleValidator: ValidatorResult {
-    private var isValid: Bool
     private var valueStr: String
     
-    var isFailure: Bool {
-        return !isValid
+    init(valueStr: String) {
+        self.valueStr = valueStr
     }
-    
-    var successDescription: String? {
-        return nil
-    }
-    
+}
+
+// MARK: - BaseValidatorResult
+extension StringDoubleValidator: BaseValidatorResult {
     var failureDescription: String? {
         return "\(valueStr) is not double type str."
     }
     
-    init(valueStr: String) {
-        self.valueStr = valueStr
+    func doValidate() -> Bool {
         let doubleValue = Double(valueStr)
-        isValid = doubleValue != nil
+        return doubleValue != nil
     }
 }
