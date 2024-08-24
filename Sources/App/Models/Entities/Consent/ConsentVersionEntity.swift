@@ -24,6 +24,9 @@ final class ConsentVersionEntity: Model, Content {
     @Field(key: "consent_html")
     var htmlString: String
     
+    @Field(key: "is_published")
+    var isPublished: Bool
+    
     @Timestamp(key: "created_at", on: .create)
     var createdAt: Date?
     
@@ -32,11 +35,12 @@ final class ConsentVersionEntity: Model, Content {
     init(
         consentId: ConsentEntity.IDValue,
         version: Double,
-        htmlString: String
+        htmlString: String,
+        isPublished: Bool
     ) {
         self.$consent.id = consentId
         self.version = version
         self.htmlString = htmlString
+        self.isPublished = isPublished
     }
 }
-

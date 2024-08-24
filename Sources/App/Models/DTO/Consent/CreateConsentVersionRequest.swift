@@ -11,6 +11,7 @@ import Vapor
 struct CreateConsentVersionRequest: Content {
     let version: String
     let consentHTML: String
+    let isPublished: Bool
 }
 
 // MARK: - Validatable
@@ -32,6 +33,11 @@ extension ConsentVersionEntity {
         consentId: ConsentEntity.IDValue
     ) {
         let doubleVersion = Double(request.version) ?? 1.0
-        self.init(consentId: consentId, version: doubleVersion, htmlString: request.consentHTML)
+        self.init(
+            consentId: consentId,
+            version: doubleVersion,
+            htmlString: request.consentHTML,
+            isPublished: request.isPublished
+        )
     }
 }

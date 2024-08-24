@@ -12,6 +12,7 @@ struct ConsentCreateRequest: Content {
     let consentName: String
     let consentCaption: String
     let consentType: ConsentType
+    let isPublished: Bool
 }
 
 // MARK: - Validatable
@@ -30,7 +31,8 @@ extension ConsentEntity {
         self.init(
             consentName: request.consentName,
             consentCaption: request.consentCaption,
-            consentType: request.consentType
+            consentType: request.consentType,
+            isPublished: request.isPublished
         )
     }
 }

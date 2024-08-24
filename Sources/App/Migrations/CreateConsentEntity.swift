@@ -16,6 +16,7 @@ struct CreateConsentEntity: AsyncMigration {
             .field("consent_caption", .string, .required)
             .field("consent_type", .string, .required)
             .unique(on: "consent_type")
+            .field("is_published", .bool, .required)
             .field("created_at", .datetime, .required)
             .field("updated_at", .datetime, .required)
             .create()
