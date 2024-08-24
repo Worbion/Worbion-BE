@@ -22,6 +22,9 @@ struct CreateUserEntity: AsyncMigration {
             .field(
                 "is_email_verified", .bool, .required, .custom("DEFAULT FALSE")
             )
+            .field(
+                "is_phone_verified", .bool, .required, .custom("DEFAULT FALSE")
+            )
             .field("email", .string, .required)
             .unique(on: "email")
             .field("username", .string, .required)

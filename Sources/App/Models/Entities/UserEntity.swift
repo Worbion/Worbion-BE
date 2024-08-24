@@ -62,6 +62,9 @@ final class UserEntity: Model, Authenticatable {
     @Field(key: "is_email_verified")
     var isEmailVerified: Bool
     
+    @Field(key: "is_phone_verified")
+    var isPhoneVerified: Bool
+    
     @Timestamp(key: "created_at", on: .create)
     var createdAt: Date?
     
@@ -84,7 +87,8 @@ final class UserEntity: Model, Authenticatable {
         websiteUrl: String? = nil,
         passwordHash: String,
         role: UserRole = .user,
-        isEmailVerified: Bool = false
+        isEmailVerified: Bool = false,
+        isPhoneVerified: Bool = false
     ) {
         self.id = id
         self.name = name
@@ -100,6 +104,7 @@ final class UserEntity: Model, Authenticatable {
         self.passwordHash = passwordHash
         self.role = role
         self.isEmailVerified = isEmailVerified
+        self.isPhoneVerified = isPhoneVerified
     }
 }
 
