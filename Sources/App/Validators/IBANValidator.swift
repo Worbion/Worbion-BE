@@ -8,29 +8,23 @@
 import Vapor
 
 // MARK: - IBANValidator
-struct IBANValidator: ValidatorResult {
+struct IBANValidator {
     private var ibanValueStr: String
-        
-    var isFailure: Bool {
-        let isValid = doValidateIBAN()
-        return !isValid
-    }
-    
-    var successDescription: String? {
-        return nil
-    }
-    
-    var failureDescription: String? {
-        return "\(ibanValueStr) is not valid IBAN."
-    }
     
     init(ibanValueStr: String) {
         self.ibanValueStr = ibanValueStr
     }
 }
 
-private extension IBANValidator {
-    func doValidateIBAN() -> Bool {
+// MARK: - BaseValidatorResult
+extension IBANValidator: BaseValidatorResult {
+    
+    var failureDescription: String? {
+        return "\(ibanValueStr) is not valid IBAN."
+    }
+    
+    func doValidate() -> Bool {
+        guard StringOutWhiteSpaceAndNewLineValidator(string: ibanValueStr).isFailure else { return false }
         let ibanLength = 26
         
         let regex = try! NSRegularExpression(pattern: "^[A-Z]{2}[0-9]{2}[0-9A-Z]{22}$")
