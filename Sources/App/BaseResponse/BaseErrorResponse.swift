@@ -18,13 +18,7 @@ struct BaseErrorResponse: Content {
         self.identifier = identifier
     }
     
-    init(with error: Error) {
-        let error = (error as? BaseError) ?? GeneralError.generic(
-            userMessage: nil,
-            systemMessage: error.localizedDescription,
-            status: .internalServerError
-        )
-        
+    init(error: BaseError) {
         systemMessage = error.systemMessage
         userMessage = error.userMessage
         identifier = error.identifier

@@ -36,7 +36,23 @@ public final class ErrorMiddleware: Middleware {
             
             // attempt to serialize the error to json
             do {
-                let errorResponse = BaseResponse<BaseEmptyResponse>.failure(error: error)
+                let baseError = (error as? BaseError) ?? GeneralError.generic(userMessage: nil, systemMessage: error.localizedDescription, status: .internalServerError)
+                
+                let localization = req.localization
+                
+                var localizedUserMessage: String? = nil
+                
+                if let userMessage = baseError.userMessage {
+                    localizedUserMessage = localization.localize(key: userMessage)
+                }
+                
+                let baseErrorResponse = BaseErrorResponse(
+                    systemMessage: baseError.systemMessage,
+                    userMessage: localizedUserMessage,
+                    identifier: baseError.identifier
+                )
+                
+                let errorResponse = BaseResponse<BaseEmptyResponse>.failure(error: baseErrorResponse)
                 response.body = try .init(data: JSONEncoder().encode(errorResponse), byteBufferAllocator: req.byteBufferAllocator)
                 response.headers.replaceOrAdd(name: .contentType, value: "application/json; charset=utf-8")
             } catch {

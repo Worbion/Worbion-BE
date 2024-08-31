@@ -17,10 +17,8 @@ extension BaseResponse{
     static func success(data: T? = nil) -> BaseResponse{
         return BaseResponse(data: data)
     }
-
-    static func failure(error: Error) -> BaseResponse{
-        let error = BaseErrorResponse(with: error)
-        let response = BaseResponse(success: false, error: error)
-        return response
+    
+    static func failure(error base: BaseErrorResponse) -> BaseResponse  {
+        return .init(success: false, error: base)
     }
 }
