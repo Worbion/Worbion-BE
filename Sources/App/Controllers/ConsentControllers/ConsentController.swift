@@ -11,59 +11,82 @@ import Fluent
 // MARK: - ConsentController
 struct ConsentController: RouteCollection {
     func boot(routes: any RoutesBuilder) throws {
-        routes.group("consents") { consents in
-            consents.group(AdminAuthenticator()) { adminAuthenticated in
+        let keyPath = "consents"
+        
+        routes.group("panel", "\(keyPath)") { panel in
+            panel.group(AdminAuthenticator()) { adminAuthenticated in
                 boot(panel: adminAuthenticated)
             }
-            consents.group(UserAuthenticator()) { consents in
-                consents.get("latest-version", use: getLastestVersionOfConsent(request:))
-                consents.get("types", use: getAllUserVisibleConsentTypes(request:))
-            }
+        }
+        
+        routes.group("\(keyPath)") { consents in
+            consents.get("latest-version", use: getLastestVersionOfConsent)
+            consents.get(use: getConsentsFromBundle)
         }
     }
 }
 
-// MARK: - Consent Operations
-fileprivate extension ConsentController {    
-    @Sendable
-    func getAllUserVisibleConsentTypes(request: Request) async throws -> BaseResponse<[ConsentType]> {
-        let consents = ConsentType.allCases.filter { $0.isUserVisibleAgreementType }
-        return .success(data: consents)
-    }
-}
-
 // MARK: - Consent Version Operations
-private extension ConsentController {    
+private extension ConsentController {
     @Sendable
-    func getLastestVersionOfConsent(request: Request) async throws -> BaseResponse<ConsentVersionResponse> {
+    /// Fetch most current and published version of the requested consent type
+    /// - Returns: ConsentVersionResponse type to
+    func getLastestVersionOfConsent(request: Request) async throws -> BaseResponse<ConsentVersionResponseDTO> {
         let consentType = try request.query.get(
-            decodableType: ConsentType.self,
+            decodableType: String.self,
             at: "type"
         )
         
         let latestVersionOfConsent = try await ConsentVersionEntity.query(on: request.db)
             .join(parent: \ConsentVersionEntity.$consent)
             .filter(ConsentEntity.self, \.$consentType == consentType)
+            .filter(\ConsentVersionEntity.$isPublished == true)
             .sort(\ConsentVersionEntity.$version, .descending)
+            .with(\.$consent)
             .first()
 
-        guard
-            let latestVersionOfConsent
-        else {
+        guard let latestVersionOfConsent else {
+            // TODO: - Localization
             let message = "Consent version not found."
-            let error = GeneralError.generic(
+            throw GeneralError.generic(
                 userMessage: message,
                 systemMessage: message,
                 status: .notFound
             )
-            throw error
         }
         
-        let response = ConsentVersionResponse(
+        let response = ConsentVersionResponseDTO(
+            consentName: latestVersionOfConsent.consent.consentName,
             consentHtml: latestVersionOfConsent.htmlString,
             version: latestVersionOfConsent.version
         )
         
+        return .success(data: response)
+    }
+    
+    @Sendable
+    /// Returns consents by consent bundle type.
+    /// - Returns: ConsentBundleResponse array
+    func getConsentsFromBundle(request: Request) async throws -> BaseResponse<InConsentBundleConfirmationResponseDTO> {
+        // TODO: - Localization
+        let bundleType = try request.query.get(
+            decodableType: String.self,
+            at: "bundleType",
+            specMessage: "Bundle type is missing or incorrect."
+        )
+        
+        let inBundleConsents = try await InBundleConsentEntity.query(on: request.db)
+            .join(parent: \InBundleConsentEntity.$bundle)
+            .filter(ConsentBundleEntity.self, \.$type == bundleType)
+            .with(\.$consent)
+            .all()
+        
+        guard !inBundleConsents.isEmpty else {
+            return .success(data: nil)
+        }
+        
+        let responseItems = inBundleConsents.compactMap { $0.mapToInBundleConsentConfirmationResponse(request: request) }
+        let response = InConsentBundleConfirmationResponseDTO(consents: responseItems)
         return .success(data: response)
     }
 }
