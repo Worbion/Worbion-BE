@@ -11,6 +11,8 @@ import Fluent
 struct AuthenticationController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         routes.group("auth") { auth in
+            auth.group("guest", configure: boot(guest:))
+            
             auth.post("register", use: register)
             auth.post("login", use: login)
             auth.delete("logout", use: logout)
