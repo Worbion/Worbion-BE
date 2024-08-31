@@ -1,5 +1,5 @@
 {
-  "originHash" : "0eae868bf28c2dd07cee8284fd457d7ff9b40fee94440c98d604d1efaee5341c",
+  "originHash" : "5dc91a99375be5afb20c3ad556bc2512b7c968b50acda2007cb71daf33060c93",
   "pins" : [
     {
       "identity" : "async-http-client",
@@ -89,6 +89,42 @@
       "state" : {
         "revision" : "c2595b9ad7f512d7f334830b4df1fed6e917946a",
         "version" : "4.13.4"
+      }
+    },
+    {
+      "identity" : "leaf",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/vapor/leaf.git",
+      "state" : {
+        "revision" : "0be8765af9991823c854d97faa4a97db1cfa2643",
+        "version" : "4.3.0"
+      }
+    },
+    {
+      "identity" : "leaf-kit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/vapor/leaf-kit.git",
+      "state" : {
+        "revision" : "c04e54753fb30a985b42c3be8530bb94442da9c6",
+        "version" : "1.11.0"
+      }
+    },
+    {
+      "identity" : "lingo",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/miroslavkovac/Lingo.git",
+      "state" : {
+        "revision" : "c6f6a80af46dff193b60bd07bc82be444ef9a7d2",
+        "version" : "4.0.0"
+      }
+    },
+    {
+      "identity" : "lingo-vapor",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/vapor-community/Lingo-Vapor.git",
+      "state" : {
+        "revision" : "361b19214e9ae52d9c60457f014acf705a3bb959",
+        "version" : "4.4.0"
       }
     },
     {

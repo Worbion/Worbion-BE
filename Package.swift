@@ -24,7 +24,9 @@ let package = Package(
         // Mailgun
         .package(url: "https://github.com/vapor-community/mailgun.git", from: "5.0.0"),
         // Google Cloud Kit
-        .package(url: "https://github.com/vapor-community/google-cloud.git", from: "1.4.1")
+        .package(url: "https://github.com/vapor-community/google-cloud.git", from: "1.4.1"),
+        // Lingo
+        .package(url: "https://github.com/vapor-community/Lingo-Vapor.git", from: "4.2.0")
     ],
     targets: [
         .executableTarget(
@@ -40,6 +42,7 @@ let package = Package(
                 .product(name: "QueuesRedisDriver", package: "queues-redis-driver"),
                 .product(name: "Mailgun", package: "mailgun"),
                 .product(name: "CloudStorage", package: "google-cloud"),
+                .product(name: "LingoVapor", package: "Lingo-Vapor")
             ]
         ),
         .testTarget(
