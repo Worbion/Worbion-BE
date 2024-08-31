@@ -20,8 +20,10 @@ struct ConsentController: RouteCollection {
         }
         
         routes.group("\(keyPath)") { consents in
-            consents.get("latest-version", use: getLastestVersionOfConsent)
-            consents.get(use: getConsentsFromBundle)
+            consents.group(GuestAuthenticator()) { guestAuthenticated in
+                guestAuthenticated.get("latest-version", use: getLastestVersionOfConsent)
+                guestAuthenticated.get(use: getConsentsFromBundle)
+            }
         }
     }
 }
