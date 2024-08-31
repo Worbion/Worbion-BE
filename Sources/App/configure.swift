@@ -3,6 +3,7 @@ import JWT
 import Fluent
 import FluentPostgresDriver
 import GoogleCloud
+import LingoVapor
 
 // configures your application
 public func configure(_ app: Application) async throws {
@@ -32,6 +33,11 @@ public func configure(_ app: Application) async throws {
             as: .psql
         )
     }
+    
+    app.lingoVapor.configuration = LingoConfiguration(
+        defaultLocale: Constants.Language.defaultLocalizationLangKey,
+        localizationsDir: Constants.Language.localizationsDIR
+    )
     
     app.routes.defaultMaxBodySize = "10mb"
     
