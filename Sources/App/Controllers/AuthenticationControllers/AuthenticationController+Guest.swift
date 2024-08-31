@@ -6,7 +6,6 @@
 //
 
 import Vapor
-import Fluent
 
 // MARK: - AuthenticationController+Guest
 extension AuthenticationController {

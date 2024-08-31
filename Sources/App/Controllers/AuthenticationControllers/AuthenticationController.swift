@@ -13,6 +13,12 @@ struct AuthenticationController: RouteCollection {
         routes.group("auth") { auth in
             auth.group("guest", configure: boot(guest:))
             
+            auth.group("panel") { panelPath in
+                panelPath.group(CroupierAuthenticator()) { panelAuthenticated in
+                    panelAuthenticated.post("login", use: login)
+                }
+            }
+            
             auth.post("register", use: register)
             auth.post("login", use: login)
             auth.delete("logout", use: logout)
