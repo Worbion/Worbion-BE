@@ -8,6 +8,7 @@
 import Vapor
 
 enum UserRole: String, Content, CaseIterable {
+    case guest = "guest"
     case user = "user"
     case croupier = "croupier"
     case moderator = "moderator"
@@ -18,16 +19,18 @@ enum UserRole: String, Content, CaseIterable {
 extension UserRole {
     var roleLevel: Int {
         switch self {
-        case .user:
+        case .guest:
             return 0
-        case .croupier:
+        case .user:
             return 1
-        case .moderator:
+        case .croupier:
             return 2
-        case .admin:
+        case .moderator:
             return 3
-        case .superadmin:
+        case .admin:
             return 4
+        case .superadmin:
+            return 5
         }
     }
 }
