@@ -137,21 +137,21 @@ extension AuthenticationError {
     var userMessage: String? {
         switch self {
         case .passwordsDontMatch:
-            return "passwords_dont_match"
+            return "auth.error.passwords_dont_match"
         case .emailAlreadyExists:
-            return "email_already_exists"
+            return "auth.error.email_already_exists"
         case .invalidEmailOrPassword:
-            return "invalid_email_or_password"
+            return "auth.error.invalid_email_or_password"
         case .invalidEmail:
-            return "invalid_email"
+            return "auth.error.invalid_email"
         case .userNotFound:
-            return "user_not_found"
+            return "auth.error.user_not_found"
         case .emailTokenHasExpired:
-            return "email_token_has_expired"
+            return "auth.error.email_token_has_expired"
         case .emailIsNotVerified:
-            return "email_is_not_verified"
+            return "auth.error.email_is_not_verified"
         case .passwordTokenHasExpired:
-            return "password_token_has_expired"
+            return "auth.error.password_token_has_expired"
         default:
             return nil
         }

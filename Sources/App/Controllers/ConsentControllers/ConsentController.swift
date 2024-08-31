@@ -48,8 +48,7 @@ private extension ConsentController {
             .first()
 
         guard let latestVersionOfConsent else {
-            // TODO: - Localization
-            let message = "Consent version not found."
+            let message = "consent.error.consent_version_not_found"
             throw GeneralError.generic(
                 userMessage: message,
                 systemMessage: message,
@@ -70,7 +69,6 @@ private extension ConsentController {
     /// Returns consents by consent bundle type.
     /// - Returns: ConsentBundleResponse array
     func getConsentsFromBundle(request: Request) async throws -> BaseResponse<InConsentBundleConfirmationResponseDTO> {
-        // TODO: - Localization
         let bundleType = try request.query.get(
             decodableType: String.self,
             at: "bundleType",

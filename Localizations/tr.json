@@ -10,6 +10,11 @@
             "email_is_not_verified": "Mail adresin doğrulanmamış. Doğrulama bağlantısı göndermemizi ister misin ?",
             "password_token_has_expired": "Şifre sıfırlama bağlantısının süresi dolmuş. Tekrar göndermemizi ister misin ?"
         }
+    },
+    "consents": {
+        "error": {
+            "consent_version_not_found": "Sözleşme bulunamadı."
+        }
     }
 }
 
