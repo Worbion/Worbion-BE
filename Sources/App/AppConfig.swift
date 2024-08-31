@@ -10,18 +10,27 @@ import Vapor
 struct AppConfig {
     let frontendURL: String
     let apiURL: String
+    let deeplinkUrl: String
     let noReplyEmail: String
     
     static var environment: AppConfig {
         guard
             let frontendURL = Environment.get("SITE_FRONTEND_URL"),
             let apiURL = Environment.get("SITE_API_URL"),
+            let deeplinkURL = Environment.get("SITE_DEEPLINK_URL"),
             let noReplyEmail = Environment.get("NO_REPLY_EMAIL")
-            else {
-                fatalError("Please add app configuration to environment variables")
+        else {
+            fatalError("Please add app configuration to environment variables")
         }
         
-        return .init(frontendURL: frontendURL, apiURL: apiURL, noReplyEmail: noReplyEmail)
+        let config = AppConfig(
+            frontendURL: frontendURL,
+            apiURL: apiURL,
+            deeplinkUrl: deeplinkURL,
+            noReplyEmail: noReplyEmail
+        )
+        
+        return config
     }
 }
 
