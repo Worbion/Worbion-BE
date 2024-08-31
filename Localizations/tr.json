@@ -1,2 +1,15 @@
 {
+    "auth": {
+        "error": {
+            "passwords_dont_match": "Girdiğiniz parolalar uyuşmamaktadır",
+            "email_already_exists": "Bu email adresi sistemde zaten kayıtlı",
+            "invalid_email_or_password": "Email adresi veya şifre hatalı",
+            "invalid_email": "Geçersiz emai adresi",
+            "user_not_found": "Kullanıcı bulunamadı",
+            "email_token_has_expired": "Email doğrulama bağlantısının süresi dolmuş. Tekrar göndermemizi ister misin ?",
+            "email_is_not_verified": "Mail adresin doğrulanmamış. Doğrulama bağlantısı göndermemizi ister misin ?",
+            "password_token_has_expired": "Şifre sıfırlama bağlantısının süresi dolmuş. Tekrar göndermemizi ister misin ?"
+        }
+    }
 }
+
