@@ -18,7 +18,17 @@ extension AuthenticationController {
 fileprivate extension AuthenticationController {
     @Sendable
     func login(request: Request) async throws -> BaseResponse<GuestLoginResponse> {
-        let guestAccessToken = try request.jwt.sign(GuestPayload())
+        guard let deviceId = request.getCustomHeaderField(by: .deviceId) else {
+            let message = "Auth fields required"
+            throw GeneralError.generic(
+                userMessage: nil,
+                systemMessage: message,
+                status: .badRequest
+            )
+        }
+        
+        let guestPayload = GuestPayload(deviceId: deviceId)
+        let guestAccessToken = try request.jwt.sign(guestPayload)
         let guestLoginResponse = GuestLoginResponse(accessToken: guestAccessToken)
         
         return .success(data: guestLoginResponse)

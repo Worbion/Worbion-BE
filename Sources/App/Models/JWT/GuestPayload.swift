@@ -9,6 +9,7 @@ import Vapor
 import JWT
 
 struct GuestPayload: JWTPayload, Authenticatable {
+    var deviceId: String
     var role: UserRole
     var exp: ExpirationClaim
     
@@ -22,7 +23,8 @@ struct GuestPayload: JWTPayload, Authenticatable {
         
     }
     
-    init() {
+    init(deviceId: String) {
+        self.deviceId = deviceId
         role = .guest
         exp = ExpirationClaim(value: Date().addingTimeInterval(.accessTokenLifeTime))
     }
