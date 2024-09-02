@@ -56,15 +56,12 @@ extension UserAddressController {
     func updateUserAddress(request: Request) async throws -> BaseResponse<Bool> {
         let payload = try request.auth.require(Payload.self)
         
-        guard
-            let addressId = request.parameters.get("addressId", as: Int64.self)
-        else {
-            let error = GeneralError.generic(
+        guard let addressId = request.parameters.get("addressId", as: Int64.self) else {
+            throw GeneralError.generic(
                 userMessage: nil,
                 systemMessage: "addressId is missing or incorrect parameter.",
                 status: .badRequest
             )
-            throw error
         }
         
         try CRUUserAddressRequest.validate(content: request)
@@ -96,15 +93,12 @@ extension UserAddressController {
     func getAddressDetail(request: Request) async throws -> BaseResponse<UserAddressDetailResponse> {
         let payload = try request.auth.require(Payload.self)
         
-        guard
-            let addressId = request.parameters.get("addressId", as: Int64.self)
-        else {
-            let error = GeneralError.generic(
+        guard let addressId = request.parameters.get("addressId", as: Int64.self) else {
+            throw GeneralError.generic(
                 userMessage: nil,
                 systemMessage: "addressId is missing or incorrect parameter.",
                 status: .badRequest
             )
-            throw error
         }
         
         let addressEntity = try await UserAddressEntity.query(on: request.db)
@@ -125,15 +119,12 @@ extension UserAddressController {
     func deleteAddress(request: Request) async throws -> BaseResponse<Bool> {
         let payload = try request.auth.require(Payload.self)
         
-        guard
-            let addressId = request.parameters.get("addressId", as: Int64.self)
-        else {
-            let error = GeneralError.generic(
+        guard let addressId = request.parameters.get("addressId", as: Int64.self) else {
+            throw GeneralError.generic(
                 userMessage: nil,
                 systemMessage: "addressId is missing or incorrect parameter.",
                 status: .badRequest
             )
-            throw error
         }
         
         try await UserAddressEntity.query(on: request.db)

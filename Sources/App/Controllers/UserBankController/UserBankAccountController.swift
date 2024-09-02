@@ -48,10 +48,13 @@ extension UserBankAccountController {
         do {
             try await bankAccount.save(on: request.db)
         }catch {
-            if let dbError = error as? DatabaseError, dbError.isConstraintFailure {
+            if error.isDBConstraintFailureError {
                 let message = "This bank account already exist."
-                let error = GeneralError.generic(userMessage: message, systemMessage: message, status: .conflict)
-                throw error
+                throw GeneralError.generic(
+                    userMessage: message,
+                    systemMessage: message,
+                    status: .conflict
+                )
             }
             throw error
         }
@@ -62,15 +65,12 @@ extension UserBankAccountController {
     func updateUserBankAccount(request: Request) async throws -> BaseResponse<Bool> {
         let payload = try request.auth.require(Payload.self)
         
-        guard
-            let bankAccountId = request.parameters.get("accountId", as: Int64.self)
-        else {
-            let error = GeneralError.generic(
+        guard let bankAccountId = request.parameters.get("accountId", as: Int64.self) else {
+            throw GeneralError.generic(
                 userMessage: nil,
                 systemMessage: "accountId is missing or incorrect parameter.",
                 status: .badRequest
             )
-            throw error
         }
         
         try UpdateUserBankAccountRequest.validate(content: request)
@@ -89,13 +89,11 @@ extension UserBankAccountController {
             throw GeneralError.generic(userMessage: nil, systemMessage: message, status: .notFound)
         }
         
-        // Check if needed update
         guard updateBankAccountRequest.updateFieldsIfNeeded(entity: userBankAccountEntity) else {
             let message = "No update needed. The fields are same"
             throw GeneralError.generic(userMessage: nil, systemMessage: message, status: .notFound)
         }
         
-        // Get new bank from id
         guard let bank = try await BankEntity.find(updateBankAccountRequest.bankId, on: request.db) else {
             let message = "Bank not found."
             throw GeneralError.generic(userMessage: nil, systemMessage: message, status: .notFound)
@@ -109,15 +107,12 @@ extension UserBankAccountController {
     func deleteUserBankAccount(request: Request) async throws -> BaseResponse<Bool> {
         let payload = try request.auth.require(Payload.self)
         
-        guard
-            let bankAccountId = request.parameters.get("accountId", as: Int64.self)
-        else {
-            let error = GeneralError.generic(
+        guard let bankAccountId = request.parameters.get("accountId", as: Int64.self) else {
+            throw GeneralError.generic(
                 userMessage: nil,
                 systemMessage: "accountId is missing or incorrect parameter.",
                 status: .badRequest
             )
-            throw error
         }
         
         let bankAccount = try await UserBankAccountEntity.query(on: request.db)
@@ -139,15 +134,12 @@ extension UserBankAccountController {
     func getUserBankAccount(request: Request) async throws -> BaseResponse<UserBankAccountResponse> {
         let payload = try request.auth.require(Payload.self)
         
-        guard
-            let bankAccountId = request.parameters.get("accountId", as: Int64.self)
-        else {
-            let error = GeneralError.generic(
+        guard let bankAccountId = request.parameters.get("accountId", as: Int64.self) else {
+            throw GeneralError.generic(
                 userMessage: nil,
                 systemMessage: "accountId is missing or incorrect parameter.",
                 status: .badRequest
             )
-            throw error
         }
         
         let bankAccount = try await UserBankAccountEntity.query(on: request.db)
