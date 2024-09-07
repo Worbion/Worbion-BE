@@ -42,7 +42,7 @@ fileprivate extension ConsentController {
     /// Retrieves all consents in the database.
     /// - Returns: Consent list
     func getAllConsents(request: Request) async throws -> BaseResponse<[ConsentEntity]> {
-        let consents = try await ConsentEntity.query(on: request.db).all()
+        let consents = try await request.consents.all()
         return .success(data: consents)
     }
     
@@ -58,7 +58,7 @@ fileprivate extension ConsentController {
         let newConsent = ConsentEntity(create: consentCreateRequest)
         
         do {
-            try await newConsent.save(on: request.db)
+            try await request.consents.create(newConsent)
         }catch {
             if error.isDBConstraintFailureError {
                 let message = "This consent type has already exist. You cant create again."
@@ -93,7 +93,7 @@ fileprivate extension ConsentController {
         
         let consentUpdateRequest = try request.content.decodeRequestContent(content: ConsentUpdateRequestDTO.self)
         
-        guard let consentEntity = try await ConsentEntity.find(consentId, on: request.db) else {
+        guard let consentEntity = try await request.consents.find(consentId) else {
             let message = "Consent not found"
             throw GeneralError.generic(
                 userMessage: message,
@@ -103,7 +103,7 @@ fileprivate extension ConsentController {
         }
         
         guard consentEntity.compareAndUpdateFieldsIfCanDo(with: consentUpdateRequest) else {
-            let message = "Update failed. Fields are same."
+            let message = "Fields are same."
             throw GeneralError.generic(
                 userMessage: message,
                 systemMessage: message,
@@ -111,7 +111,7 @@ fileprivate extension ConsentController {
             )
         }
         
-        try await consentEntity.update(on: request.db)
+        try await request.consents.update(consentEntity)
         
         return .success(data: true)
     }
@@ -136,33 +136,12 @@ fileprivate extension ConsentController {
         
         let createConsentVersionRequest = try request.content.decodeRequestContent(content: CreateConsentVersionRequestDTO.self)
         
-        guard let consent = try await ConsentEntity.find(consentId, on: request.db) else {
-            let message = "The Consent you want to create new version not found."
-            throw GeneralError.generic(
-                userMessage: message,
-                systemMessage: message,
-                status: .notFound
-            )
-        }
-        
         let versionEntity = ConsentVersionEntity(
             create: createConsentVersionRequest,
             consentId: consentId
         )
         
-        do {
-            try await consent.$versions.create(versionEntity, on: request.db)
-        }catch {
-            if error.isDBConstraintFailureError {
-                let message = "This consent version is already exist. Please change the version."
-                throw GeneralError.generic(
-                    userMessage: message,
-                    systemMessage: message,
-                    status: .conflict
-                )
-            }
-            throw error
-        }
+        try await request.consents.createVersion(versionEntity, for: consentId)
         
         let newVersionId = try versionEntity.requireID()
         
@@ -192,15 +171,7 @@ fileprivate extension ConsentController {
             at: "version"
         )
         
-        let versionQuery = ConsentVersionEntity.query(on: request.db)
-            .filter(\.$consent.$id == consentId)
-        
-        if let requestedVersion {
-            versionQuery.filter(\.$version == requestedVersion)
-        }
-        
-        let versions = try await versionQuery.all()
-        
+        let versions = try await request.consents.getVersions(requestedVersion, for: consentId)
         let response = versions.compactMap { $0.mapConsentVersionXLResponse }
         return .success(data: response)
     }
@@ -219,10 +190,8 @@ fileprivate extension ConsentController {
         }
         
         let updateConsentVersionRequest = try request.content.decodeRequestContent(content: UpdateConsentVersionRequestDTO.self)
-        
-        let versionEntity = try await ConsentVersionEntity.find(consentVersionId, on: request.db)
-        
-        guard let versionEntity else {
+                
+        guard let versionEntity = try await request.consents.findVersion(consentVersionId) else {
             let message = "The version is not found. Please refresh your page."
             let error = GeneralError.generic(
                 userMessage: message,
@@ -241,7 +210,7 @@ fileprivate extension ConsentController {
             )
         }
         
-        try await versionEntity.update(on: request.db)
+        try await request.consents.updateVersion(versionEntity)
         return .success(data: true)
     }
 }
@@ -252,7 +221,7 @@ fileprivate extension ConsentController {
     /// Returns all consent bundles
     /// - Returns: ConsentBundleEntity Array
     func getAllConsentBundles(request: Request) async throws -> BaseResponse<[ConsentBundleEntity]> {
-        let bundles = try await ConsentBundleEntity.query(on: request.db).all()
+        let bundles = try await request.consents.getAllConsentBundles()
         return .success(data: bundles)
     }
     
@@ -266,7 +235,7 @@ fileprivate extension ConsentController {
         let consentBundleEntity = ConsentBundleEntity(request: createConsentBundleRequest)
         
         do {
-            try await consentBundleEntity.save(on: request.db)
+            try await request.consents.createConsentBundle(consentBundleEntity)
         }catch {
             if error.isDBConstraintFailureError {
                 let message = "This content bundle type is exist."
@@ -298,9 +267,7 @@ fileprivate extension ConsentController {
         
         let updateConsentBundleRequest = try request.content.decodeRequestContent(content: UpdateConsentBundleDTO.self)
         
-        let consentBundleEntity = try await ConsentBundleEntity.find(bundleId, on: request.db)
-        
-        guard let consentBundleEntity else {
+        guard let consentBundleEntity = try await request.consents.findConsentBundle(bundleId) else {
             let message = "Consent bundle not found"
             throw GeneralError.generic(
                 userMessage: message,
@@ -318,7 +285,7 @@ fileprivate extension ConsentController {
             )
         }
         
-        try await consentBundleEntity.update(on: request.db)
+        try await request.consents.updateConsentBundle(consentBundleEntity)
         
         return .success(data: true)
     }
@@ -336,18 +303,7 @@ fileprivate extension ConsentController {
             )
         }
         
-        let consentBundleEntity = try await ConsentBundleEntity.find(bundleId, on: request.db)
-        
-        guard let consentBundleEntity else {
-            let message = "Consent bundle not found"
-            throw GeneralError.generic(
-                userMessage: message,
-                systemMessage: message,
-                status: .notFound
-            )
-        }
-        
-        try await consentBundleEntity.delete(on: request.db)
+        try await request.consents.deleteConsentBundle(bundleId)
         
         return .success(data: true)
     }
@@ -372,9 +328,7 @@ fileprivate extension ConsentController {
         
         let addConsentToBundleRequestDTO = try request.content.decodeRequestContent(content: AddConsentToBundleRequestDTO.self)
         
-        let consentBundleEntity = try await ConsentBundleEntity.find(bundleId, on: request.db)
-        
-        guard let consentBundleEntity else {
+        guard let consentBundleEntity = try await request.consents.findConsentBundle(bundleId) else {
             let message = "Consent bundle not found"
             throw GeneralError.generic(
                 userMessage: message,
@@ -383,7 +337,8 @@ fileprivate extension ConsentController {
             )
         }
         
-        let consentEntity = try await ConsentEntity.find(addConsentToBundleRequestDTO.consentId, on: request.db)
+        let requestedConsentId = addConsentToBundleRequestDTO.consentId
+        let consentEntity = try await request.consents.find(requestedConsentId)
         
         guard consentEntity != nil else {
             let message = "Consent not found"
@@ -400,7 +355,7 @@ fileprivate extension ConsentController {
         )
         
         do {
-            try await inBundleConsent.save(on: request.db)
+            try await request.consents.createInBundleConsent(inBundleConsent)
         }catch {
             if error.isDBConstraintFailureError {
                 let message = "this bundle already has this consent. You cant add again."
@@ -437,10 +392,7 @@ fileprivate extension ConsentController {
             )
         }
         
-        try await InBundleConsentEntity.query(on: request.db)
-            .filter(\.$consent.$id == consentId)
-            .filter(\.$bundle.$id == bundleId)
-            .delete()
+        try await request.consents.deleteInBundleConsent(consentId, bundleId)
         
         return .success(data: true)
     }

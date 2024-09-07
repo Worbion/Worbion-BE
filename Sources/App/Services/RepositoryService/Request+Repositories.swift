@@ -14,4 +14,5 @@ extension Request {
     var emailTokens: EmailTokenRepository { application.repositories.emailTokens.for(self) }
     var passwordTokens: PasswordTokenRepository { application.repositories.passwordTokens.for(self) }
     var userDevices: UserDeviceRepository { application.repositories.userDevices.for(self) }
+    var consents: ConsentRepository { application.repositories.consents.for(self) }
 }

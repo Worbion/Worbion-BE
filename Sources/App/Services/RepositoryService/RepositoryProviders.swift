@@ -17,6 +17,7 @@ extension Application.Repositories {
                 $0.repositories.use { EmailTokenRepositoryImpl(database: $0.db) }
                 $0.repositories.use { PasswordTokenRepositoryImpl(database: $0.db) }
                 $0.repositories.use { UserDeviceDatabaseRepositoryImpl(database: $0.db) }
+                $0.repositories.use { ConsentRepositoryImpl(database: $0.db) }
             }
         }
         

@@ -27,6 +27,7 @@ extension Application.Repositories {
         var makeEmailTokenRepository: ((Application) -> EmailTokenRepository)?
         var makePasswordTokenRepository: ((Application) -> PasswordTokenRepository)?
         var makeUserDeviceRepository: ((Application) -> UserDeviceRepository)?
+        var makeConsentRepository: ((Application) -> ConsentRepository)?
         init() { }
     }
     

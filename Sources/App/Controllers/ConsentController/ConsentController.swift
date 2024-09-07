@@ -39,13 +39,7 @@ private extension ConsentController {
             at: "type"
         )
         
-        let latestVersionOfConsent = try await ConsentVersionEntity.query(on: request.db)
-            .join(parent: \ConsentVersionEntity.$consent)
-            .filter(ConsentEntity.self, \.$consentType == consentType)
-            .filter(\ConsentVersionEntity.$isPublished == true)
-            .sort(\ConsentVersionEntity.$version, .descending)
-            .with(\.$consent)
-            .first()
+        let latestVersionOfConsent = try await request.consents.getLatestVersionOfConsent(consentType, true)
 
         guard let latestVersionOfConsent else {
             let message = "consent.error.consent_version_not_found"
@@ -75,11 +69,7 @@ private extension ConsentController {
             specMessage: "Bundle type is missing or incorrect."
         )
         
-        let inBundleConsents = try await InBundleConsentEntity.query(on: request.db)
-            .join(parent: \InBundleConsentEntity.$bundle)
-            .filter(ConsentBundleEntity.self, \.$type == bundleType)
-            .with(\.$consent)
-            .all()
+        let inBundleConsents = try await request.consents.getInBundleConsents(bundleType)
         
         guard !inBundleConsents.isEmpty else {
             return .success(data: nil)
