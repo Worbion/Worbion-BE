@@ -3,6 +3,8 @@
         "error": {
             "passwords_dont_match": "Girdiğiniz parolalar uyuşmamaktadır",
             "email_already_exists": "Bu email adresi sistemde zaten kayıtlı",
+            "username_already_exists": "Bu kullanıcı adı sistemde zaten kayıtlı",
+            "phone_already_exists": "Bu telefon numarası sistemde zaten kayıtlı",
             "invalid_email_or_password": "Email adresi veya şifre hatalı",
             "invalid_email": "Geçersiz emai adresi",
             "user_not_found": "Kullanıcı bulunamadı",

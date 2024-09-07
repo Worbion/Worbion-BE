@@ -18,7 +18,7 @@ struct UserController: RouteCollection {
             }
             
             user.group("panel", configure: boot(panel:))
-            user.group("devices", configure: <#T##(any RoutesBuilder) throws -> ()#>)
+            user.group("devices", configure: boot(device:))
         }
     }
 }

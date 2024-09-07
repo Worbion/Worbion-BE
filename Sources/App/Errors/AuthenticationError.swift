@@ -10,6 +10,8 @@ import Vapor
 enum AuthenticationError: BaseError {
     case passwordsDontMatch
     case emailAlreadyExists
+    case usernameAlreadyExist
+    case phoneAlreadyExist
     case invalidEmailOrPassword
     case invalidEmail
     case refreshTokenOrUserNotFound
@@ -31,6 +33,10 @@ extension AuthenticationError {
         case .passwordsDontMatch:
             return .badRequest
         case .emailAlreadyExists:
+            return .badRequest
+        case .usernameAlreadyExist:
+            return .badRequest
+        case .phoneAlreadyExist:
             return .badRequest
         case .emailTokenHasExpired:
             return .badRequest
@@ -68,6 +74,10 @@ extension AuthenticationError {
             return "auth.passwords_dont_match"
         case .emailAlreadyExists:
             return "auth.email_already_exists"
+        case .usernameAlreadyExist:
+            return "auth.username_already_exists"
+        case .phoneAlreadyExist:
+            return "auth.phone_already_exists"
         case .invalidEmailOrPassword:
             return "auth.invalid_email_or_password"
         case .invalidEmail:
@@ -104,6 +114,10 @@ extension AuthenticationError {
             return "Passwords did not match"
         case .emailAlreadyExists:
             return "A user with that email already exists"
+        case .usernameAlreadyExist:
+            return "A user with that username already exists"
+        case .phoneAlreadyExist:
+            return "A user with that phone already exists"
         case .invalidEmailOrPassword:
             return "Email or password was incorrect"
         case .invalidEmail:
@@ -140,6 +154,10 @@ extension AuthenticationError {
             return "auth.error.passwords_dont_match"
         case .emailAlreadyExists:
             return "auth.error.email_already_exists"
+        case .usernameAlreadyExist:
+            return "auth.error.username_already_exists"
+        case .phoneAlreadyExist:
+            return "auth.error.phone_already_exists"
         case .invalidEmailOrPassword:
             return "auth.error.invalid_email_or_password"
         case .invalidEmail:

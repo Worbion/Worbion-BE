@@ -6,6 +6,7 @@
 //
 
 import Fluent
+import PostgresNIO
 
 extension Error {
     var dbError: DatabaseError? {
@@ -15,5 +16,11 @@ extension Error {
     var isDBConstraintFailureError: Bool {
         guard let dbError else { return false }
         return dbError.isConstraintFailure
+    }
+    
+    var failedConstraintDescription: String? {
+        guard isDBConstraintFailureError,
+              let psqlError = (self as? PSQLError) else { return nil }
+        return psqlError.serverInfo?[.detail]
     }
 }

@@ -21,7 +21,7 @@ struct AuthenticationController: RouteCollection {
             
             auth.post("register", use: register)
             auth.post("login", use: login)
-            auth.delete("logout", use: logout)
+            auth.put("logout", use: logout)
             
             auth.group("email-verification") { emailVerificationRoutes in
                 emailVerificationRoutes.post("", use: sendEmailVerification)
@@ -54,10 +54,19 @@ private extension AuthenticationController {
         let user = try UserEntity(from: registerRequest, hash: passwordHash)
         
         do {
-            try await user.create(on: request.db)
+            try await request.users.create(user)
         }catch {
-            if let dbError = error as? DatabaseError, dbError.isConstraintFailure {
+            guard error.isDBConstraintFailureError,
+                  let failureConstraintDescription = error.failedConstraintDescription else {
+                throw error
+            }
+            
+            if failureConstraintDescription.contains("email") {
                 throw AuthenticationError.emailAlreadyExists
+            }else if failureConstraintDescription.contains("username") {
+                throw AuthenticationError.usernameAlreadyExist
+            }else if failureConstraintDescription.contains("phone_number") {
+                throw AuthenticationError.phoneAlreadyExist
             }
             throw error
         }
@@ -74,10 +83,7 @@ private extension AuthenticationController {
         try LoginRequest.validate(content: request)
         let loginRequest = try request.content.decodeRequestContent(content: LoginRequest.self)
         
-        guard let relatedUser = try await UserEntity.query(on: request.db)
-            .filter(\.$email == loginRequest.email)
-            .first()
-        else {
+        guard let relatedUser = try await request.users.find(loginRequest.email) else {
             throw AuthenticationError.invalidEmailOrPassword
         }
         
@@ -87,25 +93,20 @@ private extension AuthenticationController {
         
         guard passwordVerificationResult else { throw AuthenticationError.invalidEmailOrPassword }
     
-        try await RefreshTokenEntity.query(on: request.db)
-            .filter(\.$user.$id == relatedUser.requireID())
-            .delete()
+        try await request.refreshTokens.delete(for: relatedUser.requireID())
         
         let token = request.random.generate(bits: 256)
         let hashedToken = SHA256.hash(token)
         let refreshToken = try RefreshTokenEntity(token: hashedToken, userID: relatedUser.requireID())
         
-        try await refreshToken.create(on: request.db)
+        try await request.refreshTokens.create(refreshToken)
         
         // Create relation between device and user
-        if let deviceId = request.getCustomHeaderField(by: .deviceId) {
+        if let deviceUid = request.getCustomHeaderField(by: .deviceId) {
             do {
-                try await DeviceEntity.query(on: request.db)
-                    .filter(\.$deviceId == deviceId)
-                    .set(\.$user.$id, to: try relatedUser.requireID())
-                    .update()
+                try await request.userDevices.set(\.$user.$id, to: try relatedUser.requireID(), for: deviceUid)
             }catch {
-                request.logger.info(.init(stringLiteral: error.localizedDescription))
+                request.logger.report(error: error)
             }
         }
         
@@ -120,11 +121,8 @@ private extension AuthenticationController {
     @Sendable
     func logout(request: Request) async throws -> BaseResponse<Bool> {
         // Remove the relation between user and device
-        if let deviceId = request.getCustomHeaderField(by: .deviceId) {
-            try await DeviceEntity.query(on: request.db)
-                .filter(\.$deviceId == deviceId)
-                .set(\.$user.$id, to: nil)
-                .update()
+        if let deviceUid = request.getCustomHeaderField(by: .deviceId) {
+            try await request.userDevices.removeUserDeviceRelation(deviceUid: deviceUid)
         }
         return .success(data: true)
     }
@@ -141,15 +139,12 @@ private extension AuthenticationController {
         
         let hashedRefreshToken = SHA256.hash(accessTokenRequest.refreshToken)
         
-        guard let relatedRefreshToken = try await RefreshTokenEntity.query(on: request.db)
-            .with(\.$user)
-            .filter(\.$token == hashedRefreshToken)
-            .first()
-        else {
+        
+        guard let relatedRefreshToken = try await request.refreshTokens.find(token: hashedRefreshToken) else {
             throw AuthenticationError.refreshTokenOrUserNotFound
         }
         
-        try await relatedRefreshToken.delete(on: request.db)
+        try await request.refreshTokens.delete(relatedRefreshToken)
         
         guard relatedRefreshToken.expiresAt > Date() else {
             throw AuthenticationError.refreshTokenHasExpired
@@ -162,9 +157,12 @@ private extension AuthenticationController {
         let payload = try Payload(with: relatedUser)
         let accessToken = try request.jwt.sign(payload)
         
-        try await refreshToken.create(on: request.db)
+        try await request.refreshTokens.create(refreshToken)
         
-        let response = AccessTokenResponse(refreshToken: token, accessToken: accessToken)
+        let response = AccessTokenResponse(
+            refreshToken: token,
+            accessToken: accessToken
+        )
         
         return .success(data: response)
     }
@@ -182,21 +180,15 @@ private extension AuthenticationController {
         
         let hashedToken = SHA256.hash(token)
         
-        guard let emailToken = try await EmailTokenEntity.query(on: request.db)
-            .filter(\.$token == hashedToken)
-            .first()
-        else {
+        guard let emailToken = try await request.emailTokens.find(token: hashedToken) else {
             throw AuthenticationError.emailTokenNotFound
         }
         
-        try await emailToken.delete(on: request.db)
+        try await request.emailTokens.delete(emailToken)
         
         guard emailToken.expiresAt > Date() else { throw AuthenticationError.emailTokenHasExpired }
         
-        try await UserEntity.query(on: request.db)
-            .filter(\.$id == emailToken.$user.id)
-            .set(\.$isEmailVerified, to: true)
-            .update()
+        try await request.users.set(\.$isEmailVerified, to: true, for: emailToken.$user.id)
         
         return .success()
     }
@@ -208,10 +200,7 @@ private extension AuthenticationController {
     func resetPassword(request: Request) async throws -> BaseResponse<BaseEmptyResponse> {
         let resetPasswordRequest = try request.content.decodeRequestContent(content: ResetPasswordRequest.self)
         
-        guard let relatedUserEntity = try await UserEntity.query(on: request.db)
-            .filter(\.$email == resetPasswordRequest.email)
-            .first()
-        else {
+        guard let relatedUserEntity = try await request.users.find(resetPasswordRequest.email) else {
             throw AuthenticationError.userNotFound
         }
         
@@ -232,15 +221,12 @@ private extension AuthenticationController {
         
         let hashedToken = SHA256.hash(token)
         
-        guard let passwordToken = try await PasswordTokenEntity.query(on: request.db)
-            .filter(\.$token == hashedToken)
-            .first()
-        else {
+        guard let passwordToken = try await request.passwordTokens.find(token: hashedToken) else {
             throw AuthenticationError.invalidPasswordToken
         }
         
         guard passwordToken.expiresAt > Date() else {
-            try await passwordToken.delete(on: request.db)
+            try await request.passwordTokens.delete(passwordToken)
             throw AuthenticationError.passwordTokenHasExpired
         }
         
@@ -261,27 +247,20 @@ private extension AuthenticationController {
         
         let hashedToken = SHA256.hash(recoverAccountRequest.token)
         
-        guard let passwordTokenEntity = try await PasswordTokenEntity.query(on: request.db)
-            .filter(\.$token == hashedToken)
-            .first() else {
+        guard let passwordTokenEntity = try await request.passwordTokens.find(token: hashedToken) else {
             throw AuthenticationError.invalidPasswordToken
         }
         
         guard passwordTokenEntity.expiresAt > Date() else {
-            try await passwordTokenEntity.delete(on: request.db)
+            try await request.passwordTokens.delete(passwordTokenEntity)
             throw AuthenticationError.passwordTokenHasExpired
         }
         
         let newPasswordHash = try await request.password.async.hash(recoverAccountRequest.password)
         
-        try await UserEntity.query(on: request.db)
-            .filter(\.$id == passwordTokenEntity.$user.id)
-            .set(\.$passwordHash, to: newPasswordHash)
-            .update()
+        try await request.users.set(\.$passwordHash, to: newPasswordHash, for: passwordTokenEntity.$user.id)
         
-        try await PasswordTokenEntity.query(on: request.db)
-            .filter(\.$user.$id == passwordTokenEntity.$user.id)
-            .delete()
+        try await request.passwordTokens.delete(for: passwordTokenEntity.$user.id)
 
         return .success()
     }
@@ -293,9 +272,7 @@ private extension AuthenticationController {
     func sendEmailVerification(request: Request) async throws -> BaseResponse<BaseEmptyResponse> {
         let content = try request.content.decodeRequestContent(content: SendEmailVerificationRequest.self)
         
-        guard let relatedUser = try await UserEntity.query(on: request.db)
-            .filter(\.$email == content.email)
-            .first() else {
+        guard let relatedUser = try await request.users.find(content.email) else {
             throw AuthenticationError.invalidEmail
         }
         
