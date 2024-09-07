@@ -21,6 +21,9 @@ final class BankEntity: Model, Content {
     @Field(key: "bank_icon_url")
     var iconUrl: String
     
+    @Field(key: "bank_iban_code")
+    var ibanCode: String
+    
     @Timestamp(key: "created_at", on: .create)
     var createdAt: Date?
     

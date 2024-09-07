@@ -10,14 +10,15 @@ import Vapor
 
 // MARK: - UserDatabaseRepositoryImpl
 struct UserDatabaseRepositoryImpl: UserRepository.UserDatabaseRepository {
+
+    let database: Database
+    
+    
     func find(_ email: String) async throws -> UserEntity? {
         return try await UserEntity.query(on: database)
             .filter(\.$email == email)
             .first()
     }
-    
-    
-    let database: Database
     
     func create(_ user: UserEntity) async throws {
         try await user.save(on: database)

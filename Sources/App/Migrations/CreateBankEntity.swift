@@ -13,6 +13,7 @@ struct CreateBankEntity: AsyncMigration {
             .field("id", .int64, .identifier(auto: true))
             .field("bank_name", .string, .required)
             .field("bank_icon_url", .string, .required)
+            .field("bank_iban_code", .string, .required)
             .field("created_at", .datetime)
             .field("updated_at", .datetime)
             .create()

@@ -28,6 +28,7 @@ extension Application.Repositories {
         var makePasswordTokenRepository: ((Application) -> PasswordTokenRepository)?
         var makeUserDeviceRepository: ((Application) -> UserDeviceRepository)?
         var makeConsentRepository: ((Application) -> ConsentRepository)?
+        var makeBankRepository: ((Application) -> BankRepository)?
         init() { }
     }
     
