@@ -36,7 +36,7 @@ fileprivate extension UserController {
         let entity = DeviceEntity(create: registerDeviceRequest, device: deviceId)
         
         do {
-            try await entity.save(on: request.db)
+            try await request.userDevices.create(userDevice: entity)
         }catch {
             if error.isDBConstraintFailureError {
                 let message = "This device has already registered. You cant register again."
@@ -57,18 +57,15 @@ fileprivate extension UserController {
         
         let updateDeviceRequest = try request.content.decodeRequestContent(content: UpdateDeviceRequest.self)
         
-        guard let deviceId = request.parameters.get("deviceId", as: String.self) else {
+        guard let deviceUid = request.parameters.get("deviceId", as: String.self) else {
             throw GeneralError.generic(
                 userMessage: nil,
                 systemMessage: "deviceId is missing or incorrect parameter.",
                 status: .badRequest
             )
         }
-                
-        try await DeviceEntity.query(on: request.db)
-            .filter(\.$deviceId == deviceId)
-            .set(\.$pushToken, to: updateDeviceRequest.pushToken)
-            .update()
+        
+        try await request.userDevices.set(\.$pushToken, to: updateDeviceRequest.pushToken, for: deviceUid)
         
         return .success(data: true)
     }

@@ -18,6 +18,7 @@ struct CreateDeviceEntity: AsyncMigration {
             .field("push_token", .string, .required)
             .unique(on: "push_token")
             .field("device_os_Type", .string, .required)
+            .unique(on: "device_unique_id", "device_os_Type")
             .field("created_at", .datetime)
             .field("updated_at", .datetime)
             .create()

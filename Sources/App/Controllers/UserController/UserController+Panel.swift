@@ -31,7 +31,7 @@ fileprivate extension UserController {
         let user = try UserEntity(from: registerRequest, hash: passwordHash, generatedUserBy: payload.userID)
         
         do {
-            try await user.create(on: request.db)
+            try await request.users.create(user)
         }catch {
             if let dbError = error as? DatabaseError, dbError.isConstraintFailure {
                 throw AuthenticationError.emailAlreadyExists

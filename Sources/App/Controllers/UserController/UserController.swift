@@ -13,7 +13,6 @@ struct UserController: RouteCollection {
     func boot(routes: any RoutesBuilder) throws {
         routes.group("user") { user in
             user.group(UserAuthenticator()) { authenticated in
-                authenticated.get("check-username-available", use: checkUsernameAvailable(request:))
                 authenticated.get(":id", use: fetchUserInfo(request:))
             }
             
@@ -42,11 +41,10 @@ private extension UserController {
             throw error
         }
 
-        guard
-            let userEntity = try await UserEntity.find(userId, on: request.db)
-        else {
+        guard let userEntity = try await request.users.find(userId) else {
+            let message = "users.error.user_info.user_not_found"
             let error = GeneralError.generic(
-                userMessage: "User not found",
+                userMessage: message,
                 systemMessage: "User not found",
                 status: .notFound
             )
@@ -56,21 +54,4 @@ private extension UserController {
         let userResponse = UserProfileResponse(entity: userEntity)
         return .success(data: userResponse)
     }
-    
-    @Sendable
-    func checkUsernameAvailable(request: Request) async throws -> BaseResponse<Bool> {
-        
-        let username = try request.query.get(
-            decodableType: String.self,
-            at: "username",
-            specMessage: "Username required"
-        )
-        
-        let relatedUser = try await UserEntity.query(on: request.db)
-            .filter(\.$username == username)
-            .first()
-        
-        return .success(data: relatedUser == nil)
-    }
 }
-

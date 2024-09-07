@@ -17,6 +17,11 @@
         "error": {
             "consent_version_not_found": "Sözleşme bulunamadı."
         }
+    },
+    "users": {
+        "error": {
+            "user_info.user_not_found": "Kullanıcı profili bulunamadı."
+        }
     }
 }
 
