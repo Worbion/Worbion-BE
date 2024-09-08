@@ -34,10 +34,12 @@ final class BankEntity: Model, Content {
     
     init(
         bankName: String,
-        iconUrl: String
+        iconUrl: String,
+        ibankCode: String
     ) {
         self.bankName = bankName
         self.iconUrl = iconUrl
+        self.ibanCode = ibankCode
     }
 }
 

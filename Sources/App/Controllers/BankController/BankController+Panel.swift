@@ -12,6 +12,7 @@ import Fluent
 extension BankController {
     func boot(panel routes: any RoutesBuilder) {
         routes.group(AdminAuthenticator()) { adminAuth in
+            adminAuth.get(use: getAll)
             adminAuth.post(use: createBank)
             adminAuth.put(":bankId", use: updateBank)
             adminAuth.get(":bankId", use: getBank)
@@ -23,6 +24,12 @@ extension BankController {
 
 // MARK: - Methods
 fileprivate extension BankController {
+    @Sendable
+    func getAll(request: Request) async throws -> BaseResponse<[BankEntity]> {
+        let banks = try await request.banks.all()
+        return .success(data: banks)
+    }
+    
     @Sendable
     func createBank(request: Request) async throws -> BaseResponse<BankEntity> {
         try CreateBankRequest.validate(content: request)
@@ -55,7 +62,25 @@ fileprivate extension BankController {
             )
         }
         
-        try await request.banks.set(\.$bankName, to: updateBankRequest.bankName, for: bankId)
+        guard let bankEntity = try await request.banks.find(bankId) else {
+            let message = "bank not found"
+            throw GeneralError.generic(
+                userMessage: message,
+                systemMessage: message,
+                status: .notFound
+            )
+        }
+        
+        guard bankEntity.updateFieldsIfNeeded(update: updateBankRequest) else {
+            let message = "fields are same"
+            throw GeneralError.generic(
+                userMessage: message,
+                systemMessage: message,
+                status: .notFound
+            )
+        }
+        
+        try await request.banks.update(bankEntity)
         
         return .success()
     }

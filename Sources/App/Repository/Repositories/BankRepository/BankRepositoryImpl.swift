@@ -21,6 +21,10 @@ struct BankRepositoryImpl: BankRepository.BankDatabaseRepository {
         try await bank.save(on: database)
     }
     
+    func update(_ bank: BankEntity) async throws {
+        try await bank.update(on: database)
+    }
+    
     func all() async throws -> [BankEntity] {
         return try await BankEntity.query(on: database).all()
     }

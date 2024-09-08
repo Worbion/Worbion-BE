@@ -11,9 +11,13 @@ import Fluent
 // MARK: - BankController
 struct BankController: RouteCollection {
     func boot(routes: any RoutesBuilder) throws {
-        routes.group("banks") { banks in
-            banks.group("", configure: boot(panel:))
-            
+        let keyPath = "banks"
+        
+        routes.group("panel") { panel in
+            panel.group("\(keyPath)", configure: boot(panel:))
+        }
+        
+        routes.group("\(keyPath)") { banks in
             banks.group(UserAuthenticator()) { userAuth in
                 userAuth.get(use: getAllBanks)
             }
