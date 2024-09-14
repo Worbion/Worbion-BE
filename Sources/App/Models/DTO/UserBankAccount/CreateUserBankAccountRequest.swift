@@ -9,7 +9,6 @@ import Vapor
 
 // MARK: - CreateUserBankAccountRequest
 struct CreateUserBankAccountRequest: Content {
-    let bankId: BankEntity.IDValue
     let fullName: String
     let bankAccount: String
 }
@@ -17,7 +16,6 @@ struct CreateUserBankAccountRequest: Content {
 // MARK: - Validatable
 extension CreateUserBankAccountRequest: Validatable {
     static func validations(_ validations: inout Validations) {
-        validations.add("bankId", as: Int64.self, is: .range(1...))
         validations.add("bankAccount", as: String.self, is: !.empty)
         validations.add("fullName", as: String.self, is: .init(validate: { fullNameStr in
             return FullNameValidator(fullNameStr: fullNameStr)
@@ -25,5 +23,16 @@ extension CreateUserBankAccountRequest: Validatable {
         validations.add("bankAccount", as: String.self, is: .init(validate: { ibanStr in
             return IBANValidator(ibanValueStr: ibanStr)
         }))
+    }
+}
+
+// MARK: - UserBankAccountEntity + CreateUserBankAccountRequest
+extension UserBankAccountEntity {
+    convenience init(
+        create request: CreateUserBankAccountRequest,
+        bankId: BankEntity.IDValue?,
+        userId: UserEntity.IDValue
+    ) {
+        self.init(bankID: bankId, userID: userId, holderFullName: request.fullName, bankAccount: request.bankAccount)
     }
 }

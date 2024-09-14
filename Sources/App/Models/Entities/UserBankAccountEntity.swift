@@ -14,8 +14,8 @@ final class UserBankAccountEntity: Model {
     @ID(custom: .id, generatedBy: .database)
     var id: Int64?
     
-    @Parent(key: "bank_id")
-    var bank: BankEntity
+    @OptionalParent(key: "bank_id")
+    var bank: BankEntity?
     
     @Parent(key: "user_id")
     var user: UserEntity
@@ -35,7 +35,7 @@ final class UserBankAccountEntity: Model {
     init() {}
     
     init(
-        bankID: BankEntity.IDValue,
+        bankID: BankEntity.IDValue?,
         userID: UserEntity.IDValue,
         holderFullName: String,
         bankAccount: String

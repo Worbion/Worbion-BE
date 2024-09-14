@@ -10,7 +10,7 @@ import Vapor
 // MARK: - UserBankAccountResponse
 struct UserBankAccountResponse: Content {
     let id: Int64?
-    let bank: BankResponse
+    let bank: BankResponse?
     let fullName: String
     let iban: String
 }
@@ -20,7 +20,7 @@ extension UserBankAccountEntity {
     var mapToResponse: UserBankAccountResponse {
         return .init(
             id: id,
-            bank: bank.mapBankResponse,
+            bank: bank?.mapBankResponse,
             fullName: holderFullName,
             iban: bankAccount
         )

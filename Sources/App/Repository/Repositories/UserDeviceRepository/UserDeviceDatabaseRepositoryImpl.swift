@@ -45,6 +45,3 @@ extension Application.Repositories {
         storage.makeUserDeviceRepository = make
     }
 }
-
-
-

@@ -15,12 +15,18 @@
     },
     "consents": {
         "error": {
-            "consent_version_not_found": "Sözleşme bulunamadı."
+            "consent_version_not_found": "Sözleşme bulunamadı"
         }
     },
     "users": {
         "error": {
-            "user_info.user_not_found": "Kullanıcı profili bulunamadı."
+            "user_info.user_not_found": "Kullanıcı profili bulunamadı"
+        }
+    },
+    "user_banks": {
+        "error": {
+            "bank_not_found_by_iban": "Girdiğiniz iban numarasına ait bir banka bulunamadı",
+            "no_user_bank_account_found": "Banka hesabı bulunamadı"
         }
     }
 }

@@ -14,7 +14,6 @@ struct UserBankAccountController: RouteCollection {
         routes.group("user-bank-accounts") { userBankAccounts in
             userBankAccounts.group(UserAuthenticator()) { userAuth in
                 userAuth.post(use: createUserBankAccount)
-                userAuth.put(":accountId", use: updateUserBankAccount(request:))
                 userAuth.get(use: getAllUserBankAccounts)
                 userAuth.get(":accountId", use: getUserBankAccount)
                 userAuth.delete(":accountId", use: deleteUserBankAccount)
@@ -26,88 +25,39 @@ struct UserBankAccountController: RouteCollection {
 // MARK: - Bank Methods
 extension UserBankAccountController {
     @Sendable
-    func createUserBankAccount(request: Request) async throws -> BaseResponse<Bool> {
+    func createUserBankAccount(request: Request) async throws -> BaseResponse<BaseEmptyResponse> {
         let payload = try request.auth.require(Payload.self)
         
         try CreateUserBankAccountRequest.validate(content: request)
         
         let createBankAccountRequest = try request.content.decodeRequestContent(content: CreateUserBankAccountRequest.self)
         
-        guard let bank = try await BankEntity.find(createBankAccountRequest.bankId, on: request.db) else {
-            let message = "Bank not found"
-            throw GeneralError.generic(userMessage: nil, systemMessage: message, status: .notFound)
-        }
         
-        let bankAccount = UserBankAccountEntity(
-            bankID: try bank.requireID(),
-            userID: payload.userID,
-            holderFullName: createBankAccountRequest.fullName,
-            bankAccount: createBankAccountRequest.bankAccount
-        )
-        
-        do {
-            try await bankAccount.save(on: request.db)
-        }catch {
-            if error.isDBConstraintFailureError {
-                let message = "This bank account already exist."
-                throw GeneralError.generic(
-                    userMessage: message,
-                    systemMessage: message,
-                    status: .conflict
-                )
-            }
-            throw error
-        }
-        return .success(data: true)
-    }
-    
-    @Sendable
-    func updateUserBankAccount(request: Request) async throws -> BaseResponse<Bool> {
-        let payload = try request.auth.require(Payload.self)
-        
-        guard let bankAccountId = request.parameters.get("accountId", as: Int64.self) else {
+        guard let relatedBankCode = BankCodeParser.parse(from: createBankAccountRequest.bankAccount),
+              let bankEntity = try await request.banks.find(relatedBankCode) else {
+            let message = "user_banks.error.bank_not_found_by_iban"
             throw GeneralError.generic(
-                userMessage: nil,
-                systemMessage: "accountId is missing or incorrect parameter.",
+                userMessage: message,
+                systemMessage: message,
                 status: .badRequest
             )
         }
         
-        try UpdateUserBankAccountRequest.validate(content: request)
+        let userBankEntity = UserBankAccountEntity(
+            create: createBankAccountRequest,
+            bankId: try bankEntity.requireID(),
+            userId: payload.userID
+        )
         
-        let updateBankAccountRequest = try request.content.decodeRequestContent(content: UpdateUserBankAccountRequest.self)
-
-    
-        // Get user bank account
-        let userBankAccountEntity = try await UserBankAccountEntity.query(on: request.db)
-            .filter(\.$id == bankAccountId)
-            .filter(\.$user.$id == payload.userID)
-            .first()
-        
-        guard let userBankAccountEntity else {
-            let message = "No bank account founded"
-            throw GeneralError.generic(userMessage: nil, systemMessage: message, status: .notFound)
-        }
-        
-        guard updateBankAccountRequest.updateFieldsIfNeeded(entity: userBankAccountEntity) else {
-            let message = "No update needed. The fields are same"
-            throw GeneralError.generic(userMessage: nil, systemMessage: message, status: .notFound)
-        }
-        
-        guard let bank = try await BankEntity.find(updateBankAccountRequest.bankId, on: request.db) else {
-            let message = "Bank not found."
-            throw GeneralError.generic(userMessage: nil, systemMessage: message, status: .notFound)
-        }
-        
-        try await userBankAccountEntity.update(on: request.db)
-        return .success(data: true)
+        try await request.userBankAccounts.create(userBankEntity)
+        return .success()
     }
     
     @Sendable
     func deleteUserBankAccount(request: Request) async throws -> BaseResponse<Bool> {
         let payload = try request.auth.require(Payload.self)
         
-        guard let bankAccountId = request.parameters.get("accountId", as: Int64.self) else {
+        guard let bankAccountId = request.parameters.get("accountId", as: UserBankAccountEntity.IDValue.self) else {
             throw GeneralError.generic(
                 userMessage: nil,
                 systemMessage: "accountId is missing or incorrect parameter.",
@@ -115,17 +65,15 @@ extension UserBankAccountController {
             )
         }
         
-        let bankAccount = try await UserBankAccountEntity.query(on: request.db)
-            .filter(\.$user.$id == payload.userID)
-            .filter(\.$id == bankAccountId)
-            .first()
+        
+        let bankAccount = try await request.userBankAccounts.getOne(bankAccountId, for: payload.userID)
         
         guard let bankAccount else {
-            let message = "No bank account founded"
-            throw GeneralError.generic(userMessage: nil, systemMessage: message, status: .notFound)
+            let message = "user_banks.error.no_user_bank_account_found"
+            throw GeneralError.generic(userMessage: message, systemMessage: message, status: .notFound)
         }
         
-        try await bankAccount.delete(on: request.db)
+        try await request.userBankAccounts.delete(bankAccount)
         
         return .success(data: true)
     }
@@ -134,7 +82,7 @@ extension UserBankAccountController {
     func getUserBankAccount(request: Request) async throws -> BaseResponse<UserBankAccountResponse> {
         let payload = try request.auth.require(Payload.self)
         
-        guard let bankAccountId = request.parameters.get("accountId", as: Int64.self) else {
+        guard let bankAccountId = request.parameters.get("accountId", as: UserBankAccountEntity.IDValue.self) else {
             throw GeneralError.generic(
                 userMessage: nil,
                 systemMessage: "accountId is missing or incorrect parameter.",
@@ -142,15 +90,9 @@ extension UserBankAccountController {
             )
         }
         
-        let bankAccount = try await UserBankAccountEntity.query(on: request.db)
-            .filter(\.$user.$id == payload.userID)
-            .filter(\.$id == bankAccountId)
-            .with(\.$bank)
-            .first()
-        
-        guard let bankAccount else {
-            let message = "No bank account founded"
-            throw GeneralError.generic(userMessage: nil, systemMessage: message, status: .notFound)
+        guard let bankAccount = try await request.userBankAccounts.getOne(bankAccountId, for: payload.userID) else {
+            let message = "user_banks.error.no_user_bank_account_found"
+            throw GeneralError.generic(userMessage: message, systemMessage: message, status: .notFound)
         }
         let response = bankAccount.mapToResponse
         return .success(data: response)
@@ -160,10 +102,7 @@ extension UserBankAccountController {
     func getAllUserBankAccounts(request: Request) async throws -> BaseResponse<[UserBankAccountResponse]> {
         let payload = try request.auth.require(Payload.self)
         
-        let bankAccounts = try await UserBankAccountEntity.query(on: request.db)
-            .filter(\.$user.$id == payload.userID)
-            .with(\.$bank)
-            .all()
+        let bankAccounts = try await request.userBankAccounts.getAll(payload.userID)
         
         let response = bankAccounts.compactMap { $0.mapToResponse }
         return .success(data: response)

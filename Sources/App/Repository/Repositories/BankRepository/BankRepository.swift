@@ -13,6 +13,7 @@ protocol BankRepository: Repository {
     typealias BankDatabaseRepository = BankRepository & DatabaseRepository
     
     func find(_ id: BankEntity.IDValue) async throws -> BankEntity?
+    func find(_ bankCode: String) async throws -> BankEntity?
     func create(_ bank: BankEntity) async throws
     func all() async throws -> [BankEntity]
     func delete(_ id: BankEntity.IDValue) async throws

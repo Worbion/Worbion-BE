@@ -17,6 +17,14 @@ struct BankRepositoryImpl: BankRepository.BankDatabaseRepository {
         return try await BankEntity.find(id, on: database)
     }
     
+    func find(_ bankCode: String) async throws -> BankEntity? {
+        let bankQuery = BankEntity.query(on: database)
+        
+        bankQuery.filter(\.$ibanCode == bankCode)
+        
+        return try await bankQuery.first()
+    }
+    
     func create(_ bank: BankEntity) async throws {
         try await bank.save(on: database)
     }

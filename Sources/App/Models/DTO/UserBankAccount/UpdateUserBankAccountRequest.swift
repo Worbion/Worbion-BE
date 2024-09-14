@@ -8,37 +8,33 @@
 import Vapor
 
 // MARK: - UpdateUserBankAccountRequest
-struct UpdateUserBankAccountRequest: Content {
-    let bankId: BankEntity.IDValue
+struct UpdateUserBankAccountRequest: Content, Equatable {
     let fullName: String
-    let bankAccount: String
 }
 
 // MARK: - Validatable
 extension UpdateUserBankAccountRequest: Validatable {
     static func validations(_ validations: inout Validations) {
-        validations.add("bankId", as: Int64.self, is: .range(1...))
-        validations.add("bankAccount", as: String.self, is: !.empty)
         validations.add("fullName", as: String.self, is: .init(validate: { fullNameStr in
             return FullNameValidator(fullNameStr: fullNameStr)
-        }))
-        validations.add("bankAccount", as: String.self, is: .init(validate: { ibanStr in
-            return IBANValidator(ibanValueStr: ibanStr)
         }))
     }
 }
 
-extension UpdateUserBankAccountRequest {
-    func updateFieldsIfNeeded(entity: UserBankAccountEntity) -> Bool {
-        if bankId != entity.$bank.$id.value ||
-           fullName != entity.holderFullName ||
-           bankAccount != entity.bankAccount 
-        {
-            entity.$bank.$id.value = bankId
-            entity.holderFullName = fullName
-            entity.bankAccount = bankAccount
-            return true
+// MARK: - Fake Request
+fileprivate extension UserBankAccountEntity {
+    var fakeUpdateRequest: UpdateUserBankAccountRequest {
+        return .init(fullName: holderFullName)
+    }
+}
+
+// MARK: - Compare and update
+extension UserBankAccountEntity {
+    func updateFieldsIfNeeded(update request: UpdateUserBankAccountRequest) -> Bool {
+        guard fakeUpdateRequest != request else {
+            return false
         }
-        return false
+        holderFullName = request.fullName
+        return true
     }
 }

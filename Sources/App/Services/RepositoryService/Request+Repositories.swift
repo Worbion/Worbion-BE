@@ -16,4 +16,5 @@ extension Request {
     var userDevices: UserDeviceRepository { application.repositories.userDevices.for(self) }
     var consents: ConsentRepository { application.repositories.consents.for(self) }
     var banks: BankRepository { application.repositories.banks.for(self) }
+    var userBankAccounts: UserBankAccountRepository { application.repositories.userBankAccounts.for(self) }
 }
